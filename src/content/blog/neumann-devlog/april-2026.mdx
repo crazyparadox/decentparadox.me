@@ -1,0 +1,121 @@
+---
+title: 'April 2026 — Porting from Warp and Feature Burst'
+description: 'Neumann Devlog'
+date: '2026-05-04'
+authors: ['decentparadox']
+order: 4
+draft: true
+---
+
+import CommitList from '@/components/mdx/CommitList.astro'
+import Commit from '@/components/mdx/Commit.astro'
+import IssueList from '@/components/mdx/IssueList.astro'
+import Issue from '@/components/mdx/Issue.astro'
+import Note from '@/components/mdx/Note.astro'
+
+<div class="invisible h-0! [&+*]:mt-0 [&+*_*]:mt-0">
+## April 2026 — Porting from Warp and Feature Burst
+</div>
+
+April split cleanly into two halves.
+
+The first half was cleanup. March had been intense — a lot of features shipped quickly, which meant a fragile build, some UI regressions, and compilation errors that had been deferred. I spent the first two weeks of April just making the thing work correctly again. Boring work, but necessary work. You can't keep adding to a crumbling foundation.
+
+The second half was something different: a decision to stop reinventing things and start porting from [Warp](https://www.warp.dev).
+
+## The Warp Decision
+
+Warp is a Rust terminal with an open-sourced codebase. A lot of the problems I was facing for Neumann's terminal and agent loop were problems Warp had already solved — properly, with production usage behind them.
+
+Specifically:
+- **Kitty keyboard protocol** — accurate modifier key detection in terminals (distinguishing `Ctrl+M` from `Enter`, which the legacy VT protocol can't do)
+- **Tree-sitter integration** — parsing code semantically to build better context for the agent, rather than chunking by line count
+- **Sandbox classifier** — reasoning about whether a tool call is safe to auto-approve (reads vs writes, network vs local, reversible vs destructive)
+- **Fuzzy matching** — for the file picker and command palette
+- **Handlebars templating** — for the prompt template system
+
+The alternative was solving each of these from scratch. I'd already done one pass at a few of them and the results were mediocre. Warp's implementations were better because they'd been tested against real usage. Porting is not glamorous — you read code that wasn't written for you, figure out what it actually does (not what the comments say), strip the parts that depend on Warp's internal architecture, and rewrite the glue. But you end up with things that actually work correctly.
+
+<Note avatar="https://i.imgur.com/ZF1UFR0.jpeg">
+  There's a version of "don't reinvent the wheel" that's lazy. This wasn't that. I'd already built the wheel — it was just a bad wheel. Reading Warp's source was work. Understanding what each piece actually did, not what the name implied, took real time. But it was the right kind of work.
+</Note>
+
+## The Approval Gate
+
+The most interesting feature of the month was the approval gate (NEU-35), which came directly out of the sandbox classifier port.
+
+The idea: before the agent executes any tool call that could have side effects — writing a file, running a shell command, making an HTTP request — it has to ask you first. The sandbox classifier categorizes tool calls by risk level. The approval gate intercepts anything above your configured threshold and surfaces it in the UI:
+
+```
+Agent wants to: write_file("src/main.rs", ...)
+[Approve]  [Deny]  [Approve All]
+```
+
+This changes the workflow from "run the agent and hope" to "run the agent and stay in the loop." You see what the agent wants to do before it does it. Before this, I'd occasionally come back to find the agent had done something I didn't expect — deleted a file, made a network request, run a command with side effects I hadn't thought about. The approval gate didn't just fix a safety problem. It changed how I thought about using the tool.
+
+<Note avatar="https://i.imgur.com/ZF1UFR0.jpeg">
+  This is the feature that made Neumann feel like a collaborator instead of a black box. You're not watching the agent work from a distance — you're in the decision loop, approving the risky moves, letting the safe ones through. The whole dynamic changes.
+</Note>
+
+## Persistent Shell Sessions
+
+NEU-46 (persistent shell sessions) was another one that seemed like a nice-to-have until I actually had it.
+
+Previously, every bash tool call spawned a fresh shell process. That meant `cd` didn't stick, environment variables set in one call were gone by the next, and any setup the agent did at the start of a run was thrown away between steps. The agent would `cd` into a directory and then the next bash call would start from wherever the default working directory was.
+
+Persistent sessions mean the agent maintains a shell environment across all its bash calls within a run. It `cd`s into your project once and stays there. It sets an environment variable and can read it five tool calls later. This required rethinking how the server manages subprocess lifecycles — instead of spawn-and-forget, the server now tracks shell sessions per workspace and keeps them alive across calls.
+
+## The April 30 Sprint
+
+The last two days of April were a push. A bunch of NEU tickets that had been in progress came together at once — web search, slash commands, tree-sitter chunking, context compaction, streaming bash output, a status bar. Features that had been 80% done for a week all landed together.
+
+<CommitList>
+  <Commit hash="ebb6751" group="Early April — fixes">Resolved compilation errors and test failures across <code>neumann_cloud</code>. March had left the build in a state that needed care before anything else could land.</Commit>
+  <Commit hash="276dc7f" group="Early April — fixes">Many fixes across the board. The commit message aged poorly; the changes were real.</Commit>
+  <Commit hash="9d24396" group="Early April — fixes">More fixes. Layout regressions from the March redesign.</Commit>
+  <Commit hash="f71d6d4" group="Early April — fixes">UI changes — cleaned up the visual regressions from the floating panel redesign.</Commit>
+  <Commit hash="9b8d453" group="Early April — fixes">Review comments on issue #15 addressed; deleted tests restored; overly generic path alias removed.</Commit>
+  <Commit hash="651cdd9" group="Late April — Warp ports">Ported <code>fuzzy_match</code>, kitty keyboard protocol, and <code>string_offset</code> from Warp. The kitty protocol is why <code>Ctrl+M</code> in the terminal now correctly means <code>Ctrl+M</code> and not <code>Enter</code>.</Commit>
+  <Commit hash="8ed27ec" group="Late April — Warp ports">Ported 5 more Warp features: action results, escape sequence handling, shell integration, CLI flags, and settings schema.</Commit>
+  <Commit hash="9911161" group="Late April — Warp ports">Ported the sandbox classifier, Handlebars templating, and the tree-sitter query catalog. The sandbox classifier became the foundation for the approval gate.</Commit>
+  <Commit hash="f944759" group="Late April — Warp ports">Improvements to <code>AGENTS.md</code> generation, <code>grep</code> tool, <code>workspace_info</code> tool, and path-escape handling throughout. Better tools means a more capable agent.</Commit>
+  <Commit hash="1cd3f5d" group="Late April — Warp ports">NEU-39: finished the file tree integration using <code>@pierre/trees</code>. The file tree was previously a prototype; this made it the real thing.</Commit>
+  <Commit hash="c0a1ab5" group="April 30 — feature burst">NEU-44: retry-with-backoff for agent tool calls — transient failures no longer abort the whole run. NEU-42: <code>url_fetch</code> tool — the agent can fetch a URL and use the response as context.</Commit>
+  <Commit hash="8c0c8df" group="April 30 — feature burst">NEU-46: persistent shell sessions for the bash tool. The agent's shell environment now persists across calls within a run — <code>cd</code> sticks, env vars stick.</Commit>
+  <Commit hash="3a48b81" group="April 30 — feature burst">NEU-36: slash commands in the composer (<code>/model</code>, <code>/thinking</code>, <code>/compact</code>, <code>/session</code>, <code>/new</code>, <code>/resume</code>, <code>/export</code>, <code>/clear</code>, <code>/help</code>). NEU-43/57: tree-sitter chunker for semantic context splitting.</Commit>
+  <Commit hash="49b8251" group="April 30 — feature burst">NEU-41: web search. NEU-38: status bar. NEU-35: approval gate. NEU-45: context compaction. NEU-40: streaming bash output.</Commit>
+</CommitList>
+
+<IssueList>
+  <Issue title="Clipboard corruption in terminal (ghostty-web #108)">
+    Clicking the terminal would silently overwrite the system clipboard due to a bug in <code>ghostty-web</code> v0.1.1's selection manager. <code>Cmd+V</code> after focusing the terminal would paste whatever the terminal had last selected, not what you'd actually copied. Required patching upstream selection behavior and being careful about event ordering when the terminal gains focus.
+  </Issue>
+  <Issue title="Terminal clipboard shortcuts unreliable">
+    Separate from the above: <code>Cmd/Ctrl+C</code> and <code>Cmd/Ctrl+V</code> behaved inconsistently between browser and Tauri because clipboard APIs have different permission models in each context, and <code>ghostty-web</code>'s event propagation ordering conflicted with the app's own key handling. Took multiple iterations to stabilize.
+  </Issue>
+  <Issue title="Task prompts with repo-specific assumptions">
+    The "New Task" prompt templates were embedding Neumann-specific workflow expectations into instructions sent to external agents like Codex and Claude Code. When those agents ran against unrelated repos, they'd follow Neumann conventions instead of the target repo's own patterns. Fixed by stripping all internal assumptions from the template and letting the agent discover conventions from the repo's <code>AGENTS.md</code>.
+  </Issue>
+  <Issue title="Tauri webview zoom misconfigured">
+    The Tauri capability for adjusting webview zoom used an incorrect permission identifier. Zoom simply didn't work on desktop at all. Fixed by correcting the identifier in the Tauri config — a one-line change that had been broken since the Tauri integration shipped.
+  </Issue>
+</IssueList>
+
+## Where Things Stand
+
+As of April 30, Neumann has:
+
+- A Rust server + Next.js browser UI on loopback, with an optional Tauri desktop wrapper
+- Three agent runners: Codex, Claude Code, Amp
+- A full IDE layout: file tree, git history, inline editor, terminal
+- A CLI with a TUI (`neumann` to open, `neumann run "..."` for scripted tasks)
+- Slash commands, `@file` injection, `!bash` execution in the composer
+- Web search, URL fetch, retry-with-backoff
+- Approval gate for risky tool calls, powered by a Warp-ported sandbox classifier
+- Persistent shell sessions across a run
+- Context compaction for long-running conversations
+- SQLite for all durable state; `localStorage` for device-local UI preferences
+
+The `Cargo.toml` version is `42.7.20`. That number is deliberately nonsense — a placeholder so I don't start caring about semver before the thing is ready to ship to anyone else. When Neumann is ready to be a real thing, there'll be a `0.1.0`.
+
+I use it every day. That's the metric that matters.

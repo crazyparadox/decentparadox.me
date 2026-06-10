@@ -1,0 +1,276 @@
+---
+import { Icon } from 'astro-icon/components'
+
+export interface Props {
+  title: string
+  id?: string
+  age?: string
+  priority?: 'none' | 'low' | 'medium' | 'high' | 'urgent'
+  stage?: string
+  due?: string
+  team?: string
+  status?:
+    | 'backlog'
+    | 'todo'
+    | 'progress'
+    | 'review'
+    | 'done'
+    | 'blocked'
+    | 'abandoned'
+}
+
+const {
+  title,
+  id,
+  age,
+  priority = 'none',
+  stage,
+  due,
+  team,
+  status = 'todo',
+} = Astro.props
+
+const stageTone = {
+  backlog: 'border-border/70 bg-background/60 text-muted-foreground',
+  todo: 'border-border/70 bg-background/60 text-muted-foreground',
+  progress: 'border-sky-500/25 bg-sky-500/10 text-sky-300',
+  review: 'border-violet-500/25 bg-violet-500/10 text-violet-300',
+  done: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300',
+  blocked: 'border-amber-500/25 bg-amber-500/10 text-amber-300',
+  abandoned: 'border-rose-500/25 bg-rose-500/10 text-rose-300',
+}[status]
+
+const metaPill =
+  'inline-flex items-center gap-1 rounded-full border border-border/70 bg-background/60 px-2.5 py-1 text-xs text-muted-foreground'
+---
+
+<div
+  class="group border-border/60 bg-background/70 hover:bg-muted/15 border-b text-sm transition-colors last:border-b-0"
+>
+  <div class="flex items-start gap-4 px-5 py-4">
+    <div
+      class="text-muted-foreground/85 mt-0.5 flex shrink-0 items-center gap-3 text-[13px]"
+    >
+      <span class="w-4" aria-hidden="true">
+        {
+          priority === 'urgent' ? (
+            <span class="inline-flex size-6 items-center justify-center rounded-md bg-[#ff7a45] text-black shadow-[0_0_0_1px_rgba(255,255,255,0.06)]">
+              <span class="text-sm leading-none font-black">!</span>
+            </span>
+          ) : (
+            <span class="inline-flex items-end gap-0.5">
+              <span
+                class:list={[
+                  'bg-muted-foreground/35 h-3 w-1 rounded-[2px]',
+                  priority === 'low' && 'bg-sky-300',
+                  (priority === 'medium' || priority === 'high') &&
+                    'bg-amber-300',
+                ]}
+              />
+              <span
+                class:list={[
+                  'bg-muted-foreground/35 h-4 w-1 rounded-[2px]',
+                  (priority === 'medium' || priority === 'high') &&
+                    'bg-amber-300',
+                ]}
+              />
+              <span
+                class:list={[
+                  'bg-muted-foreground/35 h-5 w-1 rounded-[2px]',
+                  priority === 'high' && 'bg-amber-300',
+                ]}
+              />
+            </span>
+          )
+        }
+      </span>
+      {id && <span class="font-medium tracking-wide">{id}</span>}
+      <span class="flex items-center" aria-hidden="true">
+        {
+          status === 'backlog' ? (
+            <svg
+              class="text-muted-foreground/70 size-[18px]"
+              viewBox="0 0 18 18"
+              fill="none"
+            >
+              <circle
+                cx="9"
+                cy="9"
+                r="7"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-dasharray="1.75 2.25"
+                stroke-linecap="round"
+              />
+            </svg>
+          ) : status === 'progress' ? (
+            <svg
+              class="size-[18px] text-yellow-300"
+              viewBox="0 0 18 18"
+              fill="none"
+            >
+              <circle
+                cx="9"
+                cy="9"
+                r="7"
+                stroke="currentColor"
+                stroke-width="2"
+                opacity="0.3"
+              />
+              <path
+                d="M9 2a7 7 0 1 1-4.95 2.05"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+              />
+            </svg>
+          ) : status === 'review' ? (
+            <svg
+              class="size-[18px] text-violet-300"
+              viewBox="0 0 18 18"
+              fill="none"
+            >
+              <circle
+                cx="9"
+                cy="9"
+                r="7"
+                stroke="currentColor"
+                stroke-width="2"
+                opacity="0.3"
+              />
+              <path
+                d="M9 2a7 7 0 0 1 7 7"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+              />
+              <path
+                d="M16 9a7 7 0 0 1-3.2 5.86"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+              />
+            </svg>
+          ) : status === 'done' ? (
+            <svg
+              class="size-[18px] text-emerald-300"
+              viewBox="0 0 18 18"
+              fill="none"
+            >
+              <circle
+                cx="9"
+                cy="9"
+                r="7"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <path
+                d="m5.5 9 2.25 2.25L12.5 6.5"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          ) : status === 'blocked' ? (
+            <svg
+              class="size-[18px] text-amber-300"
+              viewBox="0 0 18 18"
+              fill="none"
+            >
+              <circle
+                cx="9"
+                cy="9"
+                r="7"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <path
+                d="M5.5 9h7"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+          ) : status === 'abandoned' ? (
+            <svg
+              class="size-[18px] text-rose-300"
+              viewBox="0 0 18 18"
+              fill="none"
+            >
+              <circle
+                cx="9"
+                cy="9"
+                r="7"
+                stroke="currentColor"
+                stroke-width="2"
+                opacity="0.45"
+              />
+              <path
+                d="m6 6 6 6m0-6-6 6"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+          ) : (
+            <svg
+              class="text-muted-foreground/85 size-[18px]"
+              viewBox="0 0 18 18"
+              fill="none"
+            >
+              <circle
+                cx="9"
+                cy="9"
+                r="7"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+            </svg>
+          )
+        }
+      </span>
+      {age && <span>{age}</span>}
+    </div>
+
+    <div class="min-w-0 flex-1">
+      <div
+        class="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-start xl:justify-between"
+      >
+        <div class="min-w-0 flex-1">
+          <div
+            class="text-foreground min-w-0 text-base leading-snug font-medium md:text-[1.05rem]"
+          >
+            {title}
+          </div>
+        </div>
+
+        <div class="flex shrink-0 flex-wrap items-center gap-2">
+          {stage && <span class:list={[metaPill, stageTone]}>{stage}</span>}
+          {
+            team && (
+              <span class={metaPill}>
+                <span class="bg-accent/80 size-2 rounded-full" />
+                <span>{team}</span>
+              </span>
+            )
+          }
+          {
+            due && (
+              <span class={metaPill}>
+                <Icon name="lucide:calendar" class="size-3" />
+                <span>{due}</span>
+              </span>
+            )
+          }
+        </div>
+      </div>
+
+      <div
+        class="text-muted-foreground [&_code]:bg-muted mt-3 max-w-[72ch] text-[13px] leading-relaxed [&_code]:rounded [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[11px] [&_p]:m-0"
+      >
+        <slot />
+      </div>
+    </div>
+  </div>
+</div>

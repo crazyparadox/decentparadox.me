@@ -1,0 +1,48 @@
+---
+title: 'December 2025 — Day One'
+description: 'Neumann Devlog'
+date: '2026-05-04'
+authors: ['decentparadox']
+order: 0
+draft: true
+---
+
+import CommitList from '@/components/mdx/CommitList.astro'
+import Commit from '@/components/mdx/Commit.astro'
+
+<div class="invisible h-0! [&+*]:mt-0 [&+*_*]:mt-0">
+## December 2025 — Day One
+</div>
+
+December 24th. I started Neumann on Christmas Eve because apparently that's the kind of person I am.
+
+The idea had been rattling around for a while — a local AI code editor, nothing cloud-dependent, running entirely on your machine. I'd been using Cursor and it was good, but something about having my code leave my machine for every completion bothered me. I wanted to understand what it would take to build one myself.
+
+The first version was GPUI-based. [GPUI](https://github.com/zed-industries/gpui) is Zed's GPU-accelerated UI framework — native, fast, 120fps rendering, a proper terminal emulator already built in. The pitch was: stay in Rust end-to-end and get a professional UI runtime for free. Zed had proven it could work at scale. I figured I'd ride those coattails.
+
+I built fast. In one day I had a basic sidebar, resizable panels, a file tree, a file viewer, and a main UI view. The bones were there immediately. The first few days were the most satisfying part of the whole month — the project was small enough that every commit felt like a big visible win.
+
+By late December I had a working terminal (briefly), syntax highlighting with virtual scrolling, a scrollable file tree, OIDC authentication against a local server, and theme support. The project was called "luban" at this point — Neumann came later.
+
+<CommitList>
+  <Commit hash="20cf4a4">Initialized empty state and basic sidebar. The very first commit — a blank Next.js app with a sidebar placeholder.</Commit>
+  <Commit hash="dba7279">Main UI view — the first layout with a content area next to the sidebar.</Commit>
+  <Commit hash="7c1e55e">Resizable panels. Drag the divider between panes and they resize.</Commit>
+  <Commit hash="344bd3e">File tree and file viewer. Click a file in the tree, see its contents on the right.</Commit>
+  <Commit hash="f147721">Syntax highlighting and virtual scrolling for large files. The file viewer became actually usable.</Commit>
+  <Commit hash="9f361f1">Organized components into a proper folder structure. First time the codebase had any architecture at all.</Commit>
+  <Commit hash="5ceaf73">Some UI improvements — spacing, polish, early visual iteration.</Commit>
+  <Commit hash="6413dad">More UI changes. Iterating on the layout.</Commit>
+  <Commit hash="37e4e9f">Made the file tree scrollable. It had been overflowing before this.</Commit>
+  <Commit hash="ae3ae51">Made the terminal scrollable. The terminal pane was in at this point — briefly.</Commit>
+  <Commit hash="7b99ca4">Better file tree view — icons, indentation, visual hierarchy improvements.</Commit>
+  <Commit hash="92e4a15">Working custom OIDC authentication. Local auth server, login flow, session tokens.</Commit>
+  <Commit hash="d998a5c">Auth improvements. The OIDC flow was fragile; this hardened it.</Commit>
+  <Commit hash="9c2e74c">Gitignore cleanup — removed build artifacts and local config files that had crept in.</Commit>
+  <Commit hash="3bf05a4">Removed the terminal. It had too many issues with the GPUI renderer at this stage — pulled it out to come back to later.</Commit>
+  <Commit hash="c795f5f">Theme support — light and dark mode switching.</Commit>
+</CommitList>
+
+The terminal getting removed on Dec 28 is worth noting. It was one of the features I most wanted — a proper embedded terminal in the editor. But the GPUI terminal had rendering issues I didn't understand yet, and I didn't want them blocking the rest of the UI work. Pulled it out with the intention of coming back. (I did come back — in March, via `ghostty-web` over WebSocket rather than GPUI at all.)
+
+The project ended December in reasonable shape: a real file tree, syntax-highlighted file viewer, working auth, resizable panels. Enough to keep going.

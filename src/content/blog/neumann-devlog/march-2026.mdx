@@ -1,0 +1,215 @@
+---
+title: 'March 2026 — The IDE Takes Shape'
+description: 'Neumann Devlog'
+date: '2026-05-04'
+authors: ['decentparadox']
+order: 3
+draft: true
+---
+
+import CommitList from '@/components/mdx/CommitList.astro'
+import Commit from '@/components/mdx/Commit.astro'
+import IssueList from '@/components/mdx/IssueList.astro'
+import Issue from '@/components/mdx/Issue.astro'
+import BlogFigure from '@/components/mdx/BlogFigure.astro'
+import Note from '@/components/mdx/Note.astro'
+
+<div class="invisible h-0! [&+*]:mt-0 [&+*_*]:mt-0">
+  ## March 2026 — The IDE Takes Shape
+</div>
+
+February gave me a working agent loop. March turned it into something I'd actually want to use every day.
+
+The mental shift that drove everything in March: stop thinking about Neumann as a "chat UI with some tools" and start thinking about it as a proper local IDE. That reframe changed the whole roadmap. A chat UI needs a text box and a message thread. An IDE needs a file tree, a git history panel, an inline editor, a terminal, a project switcher, a CLI, a way to install it as a desktop app.
+
+These weren't features I added one by one out of boredom. Each one came from hitting a wall in my actual workflow. I'd use Neumann to run an agent task, it would edit some files, and then I'd have to open my regular editor to see what changed. So I needed an inline file editor. The agent would run git commands and I'd have no way to see the history. So I needed a git panel. I wanted to use it from the terminal without a browser window. So I needed a CLI.
+
+The whole month was: use the thing, find what's missing, build it.
+
+## Becoming an IDE
+
+The biggest single day was March 11. I shipped the IDE layout redesign, the file tree, the git history panel, the inline file editor, full-text search with syntax highlighting, file type icons, keyboard shortcuts, and a new onboarding flow — all in one push. Most of these had been in progress for a week; March 11 was when they all got merged and stabilized together.
+
+The file tree is server-driven. The browser doesn't have direct filesystem access — it asks the Rust process for directory listings. This is the right design for a localhost app: the server owns the filesystem, the browser renders it. It also meant I could add file watching and live-updating the tree later without touching the frontend at all.
+
+<BlogFigure
+  kind="Diagram"
+  title="IDE layout overview placeholder"
+  description="A future diagram or annotated screenshot should show the March 11 Neumann layout: file tree on the left, git history panel, central editor, and the floating chrome that made it finally feel like an IDE."
+  height={340}
+/>
+
+<Note avatar="https://i.imgur.com/ZF1UFR0.jpeg">
+  March 11 was one of those days where you wake up and decide to just merge
+  everything. Six things in-flight, all of them 90% done. You stay up late,
+  stabilize them against each other, and ship. The next day is quieter — in a
+  good way.
+</Note>
+
+The inline editor was the feature I was most nervous about. Building a full code editor from scratch is a multi-year project. I didn't build one — I built a viewer/editor that handles the common cases: open a file, read it, make changes, write it back. For anything more complex the agent handles the editing. That turned out to be the right scope.
+
+## The CLI and TUI
+
+Around March 21 I shipped the `neumann` CLI — a binary that opens a TUI session backed by the same cloud engine as the browser UI. I wanted to use Neumann from inside a terminal without opening a browser window. Sometimes you're SSH'd into a machine. Sometimes you want to script something. A CLI gives you that.
+
+The TUI ended up with some features I really liked. `@file` syntax injects file contents as a structured attachment — type `@src/main.rs` in the composer and it gets sent to the agent alongside your message. `!cmd` runs a shell command and shows the output. `!!cmd` runs a command and injects the result into your message, so you can do things like `!!git diff` and have the diff automatically included in your prompt.
+
+By March 27, `tui.rs` had grown to 3,060 lines. That's the point where a file stops being a file and starts being a liability. Every change requires scrolling past hundreds of lines of unrelated code, merge conflicts become painful, and the structure gets lost. I split it into focused modules: `layout.rs`, `render.rs`, `events.rs`, `messages.rs`, `editor.rs`. The split took a few hours and immediately made everything easier to work in.
+
+## SQLite
+
+Before March, conversation history was stored in memory. Every server restart, your threads were gone.
+
+Switching to SQLite was one of those changes that felt obviously right in retrospect but took a deliberate decision to do. The implementation was straightforward — `rusqlite` with bundled SQLite, WAL mode, a migrations table, UUID thread IDs, atomic load+save transactions. One afternoon of work. Conversations survived restarts. I immediately wondered why I'd waited this long.
+
+<Note avatar="https://i.imgur.com/ZF1UFR0.jpeg">
+  SQLite is almost always the right answer for this problem space. One file, no
+  server, survives restarts, readable with any tool. I should have reached for
+  it on day one instead of treating in-memory state as a temporary solution that
+  somehow lasted two months.
+</Note>
+
+The SQLite work also led to hardening the server's path handling. Issue #15 was a path traversal bug: `resolve_workspace_path` was following symlinks without checking if the resolved path escaped the workspace root. A crafted symlink could reach anywhere on the filesystem. Fixed with explicit symlink resolution and boundary checks — resolve the symlink, verify the result is still inside the workspace root, reject if not.
+
+## Tauri
+
+I added Neumann to a Tauri desktop wrapper around March 23. The server now starts in-process when the desktop app launches and the UI loads in a WebView pointed at the local server. You can install Neumann as a `.app` and use it like a native app — no terminal required, no port to remember.
+
+The Tauri integration also introduced its own bugs. Stale Claude session IDs were one: after a Tauri restart, the cached session ID was expired server-side. All requests would fail silently until the session was cleared — no error message, no indication anything was wrong, just nothing happening when you expected something. Fixed by detecting the stale-session error response and triggering re-authentication.
+
+<CommitList>
+  <Commit hash="cb48e07">
+    Workspace file read, write, and edit operations — server routes and API
+    surface. The groundwork for the inline editor.
+  </Commit>
+  <Commit hash="c68f004">
+    Redesigned the IDE layout with floating card panels and titlebar chrome. The
+    moment the UI stopped looking like a chat app.
+  </Commit>
+  <Commit hash="199a793">
+    Onboarding flow and remaining UI scaffolding. First-run experience so new
+    users aren't dropped into an empty screen.
+  </Commit>
+  <Commit hash="5e98f68">
+    File tree and git history panels with server routes. Both panels are
+    server-driven — the Rust process owns the filesystem and git state, the
+    browser just renders them.
+  </Commit>
+  <Commit hash="de226d1">
+    Inline file editor — click any file in the tree to view and edit it without
+    leaving the app.
+  </Commit>
+  <Commit hash="abfce55">
+    Full-text search, syntax highlighting, file type icons, keyboard shortcuts,
+    new-chat UX. A large commit that landed a lot of things that had been in
+    progress simultaneously.
+  </Commit>
+  <Commit hash="414804d">
+    Restore the last opened chat when switching projects. Previously every
+    project switch reset to an empty state, which was annoying quickly.
+  </Commit>
+  <Commit hash="36d0e70">
+    Renamed <code>luban_app</code> assets to <code>neumann_app</code>. The
+    project was called "luban" internally; this was the public rename.
+  </Commit>
+  <Commit hash="0c89567">
+    Recover from stale Claude session IDs — detect the error response, clear the
+    session, re-authenticate automatically.
+  </Commit>
+  <Commit hash="f872afb">
+    Inline pasted content chips in the composer. Pasted content shows as a chip
+    rather than raw text, so you can see what's attached without the composer
+    filling up.
+  </Commit>
+  <Commit hash="60de48f">
+    Refactored large UI and Rust modules in preparation for the TUI split.
+  </Commit>
+  <Commit hash="687a36c">
+    The <code>neumann</code> CLI binary — opens a TUI session backed by the
+    cloud engine.
+  </Commit>
+  <Commit hash="b063411">
+    Added Neumann to the Tauri desktop wrapper. Server starts in-process, UI
+    loads in a WebView.
+  </Commit>
+  <Commit hash="c3b9d93">
+    <code>@file</code> syntax in the CLI composer. Injects file contents as a
+    structured attachment rather than raw text.
+  </Commit>
+  <Commit hash="f7d2e8e">
+    <code>!cmd</code> and <code>!!cmd</code> inline bash execution in the TUI.{' '}
+    <code>!</code> runs and shows output inline; <code>!!</code> runs and
+    injects the result into the message body.
+  </Commit>
+  <Commit hash="8943946">
+    Split <code>tui.rs</code> (3,060 lines) into focused modules. Long overdue.
+  </Commit>
+  <Commit hash="3bddc1a">
+    Extracted <code>LlmProvider</code> trait abstraction in{' '}
+    <code>neumann_cloud</code>. Provider-specific logic moved behind a trait —
+    adding a new provider now means implementing one trait, not editing shared
+    code.
+  </Commit>
+  <Commit hash="3e1ef62">
+    Config file system at <code>~/.config/neumann/config.toml</code>. Before
+    this, everything was scattered <code>NEUMANN_*</code> env vars with no
+    central place to see or change your configuration.
+  </Commit>
+  <Commit hash="3cfbd6b">
+    Replaced in-memory <code>HashMap</code> with SQLite persistence for thread
+    state. Conversations survive restarts.
+  </Commit>
+  <Commit hash="4d486f1">
+    UUID thread IDs, atomic load+save transactions, propagated write errors.
+    Hardened the SQLite layer after the initial implementation.
+  </Commit>
+  <Commit hash="e9976d7">
+    Per-IP and per-user token-bucket rate limiting on <code>/v1/runs</code>.
+  </Commit>
+  <Commit hash="b44ef91">
+    Fixed the rate limiter ordering — check per-user limits before IP limits;
+    handle missing <code>X-User-Id</code> header gracefully.
+  </Commit>
+  <Commit hash="63daf2a">
+    Hardened path resolution against symlink escape (issue #15). Explicit
+    symlink resolution with workspace boundary checks.
+  </Commit>
+</CommitList>
+
+<IssueList>
+  <Issue title='"Open in editor" was a no-op'>
+    The domain reducer emitted{' '}
+    <code>Effect::OpenInEditor &#123; path &#125;</code> correctly. The server
+    engine had a gap and never executed it. No error, no feedback, complete
+    silence. Only caught by manually verifying the feature worked. Fixed by
+    wiring the effect handler and adding an integration test that asserts
+    something observable happens after the click.
+  </Issue>
+  <Issue title='"Archive workspace" was a no-op'>
+    Identical class of bug — the effect was emitted and dropped. Caught in the
+    same sweep as the editor bug. Both were cases where the domain/engine
+    contract had a silent gap that no test was covering.
+  </Issue>
+  <Issue title="Symlink path traversal (issue #15)">
+    <code>resolve_workspace_path</code> followed symlinks without checking if
+    the resolved path escaped the workspace root. A crafted symlink could reach
+    anywhere on the filesystem. Fixed with explicit symlink resolution and
+    boundary checks.
+  </Issue>
+  <Issue title="Stale Claude session IDs">
+    After Tauri restart, cached session ID was expired server-side. All requests
+    failed silently — no error message surfaced. Fixed by detecting the
+    stale-session error and triggering re-auth automatically.
+  </Issue>
+  <Issue title="SQLite not persisting CLI threads">
+    Conversation history was in-memory only. Every server restart wiped all
+    threads. Switching to SQLite took one afternoon.
+  </Issue>
+  <Issue title="tui.rs at 3,060 lines">
+    Not a bug, but technical debt that was actively slowing development. Every
+    change required navigating a file with no structure. Split into eight
+    modules before adding anything else to the TUI.
+  </Issue>
+</IssueList>
+
+By the end of March, Neumann was something I'd genuinely use as my primary tool. A file tree, a terminal, a git panel, inline editing, a CLI, a desktop app. It wasn't finished, but it was real. April was when I started shipping features at a pace I couldn't quite keep up documenting.

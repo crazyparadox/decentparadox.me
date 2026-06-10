@@ -1,0 +1,24 @@
+---
+export interface Props {
+  avatar?: string
+}
+
+const { avatar } = Astro.props
+---
+
+<div class="not-prose my-6 flex items-end gap-3">
+  <div
+    class="bg-accent flex-1 rounded-lg px-4 py-3 text-sm leading-relaxed text-white [&_code]:rounded [&_code]:bg-black/20 [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[11px]"
+  >
+    <slot />
+  </div>
+  {
+    avatar && (
+      <img
+        src={avatar}
+        alt=""
+        class="ring-border size-10 shrink-0 rounded-full object-cover ring-2"
+      />
+    )
+  }
+</div>

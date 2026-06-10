@@ -1,0 +1,84 @@
+---
+title: 'February 2026 — The Rewrite'
+description: 'Neumann Devlog'
+date: '2026-05-04'
+authors: ['decentparadox']
+order: 2
+draft: true
+---
+
+import CommitList from '@/components/mdx/CommitList.astro'
+import Commit from '@/components/mdx/Commit.astro'
+import IssueList from '@/components/mdx/IssueList.astro'
+import Issue from '@/components/mdx/Issue.astro'
+import Note from '@/components/mdx/Note.astro'
+
+<div class="invisible h-0! [&+*]:mt-0 [&+*_*]:mt-0">
+## February 2026 — The Rewrite
+</div>
+
+The decision to ditch GPUI took about a day to make and about a week to feel good about. The replacement architecture: a Rust server running on loopback, a Next.js browser UI served from the same origin, talking to each other over a WebSocket.
+
+The thing that unlocked this decision was accepting a split I'd been resisting: the backend and the frontend don't have to be the same language. The Rust side owns what Rust is good at — state, processes, filesystem, concurrency. The browser side owns what browsers are good at — rendering, hot reload, layout, DevTools. The two halves talk through a typed protocol. That's not a compromise, it's just a good architecture.
+
+I bound the server to loopback only (`127.0.0.1:8421`) and made that a hard constraint. No authentication, no remote access, no multi-user anything. That one decision quietly eliminated an entire class of problems — security hardening, session management, concurrent writers, distributed state. Localhost-only means I could focus on building the tool instead of building infrastructure around the tool.
+
+<Note avatar="https://i.imgur.com/ZF1UFR0.jpeg">
+  Constraints that feel like giving up are often the most liberating design decisions. "Loopback only" wasn't a compromise — it was choosing a scope that let me actually ship things.
+</Note>
+
+## The Cloud Layer
+
+The first thing I needed was a way to talk to LLMs. I built `neumann_cloud` — a routing layer that sits between the UI and the model providers (OpenAI, Anthropic, Gemini). One place that handles provider-specific quirks: different API formats, different streaming protocols, different tool call schemas.
+
+Early on I had each provider's tool definitions duplicated separately. That was a mistake that bit me almost immediately — the three lists diverged within days, and fixing a tool schema meant fixing it in three places. Centralizing them into a single canonical list was one of the first real architectural improvements.
+
+The Anthropic integration specifically required handling stream keepalive pings. Anthropic sends periodic ping events during long-running tool calls to keep the connection alive. Without handling them, any agent turn longer than ~30 seconds would silently time out and lose the response. That was a frustrating bug to debug — the agent would "finish" with no output and no error.
+
+## The Model Discovery Problem
+
+The original UI had a hardcoded list of model names for OpenAI and Gemini. This worked until I added Anthropic, at which point I had three separate hardcoded lists that needed to stay in sync with each other and with whatever the providers actually had available.
+
+The fix was to make the server discover available models dynamically from each provider's API and surface them to the UI. The UI renders whatever the server reports — no hardcoded names, no fallback lists. When a provider adds a new model, it appears automatically. This is the only way this could work long-term.
+
+<CommitList>
+  <Commit hash="e963cb2">First working version of the browser-based architecture. Everything was wired together but almost nothing worked correctly — this was "it compiles and the two halves talk to each other."</Commit>
+  <Commit hash="e9c5dc5">Working Anthropic model routing via <code>neumann_cloud</code>. The first time an actual Anthropic response came back through the full stack.</Commit>
+  <Commit hash="161be19">Anthropic tool loop, context window management, and stream keepalive. The keepalive fix was what made long agent turns actually complete instead of silently dropping.</Commit>
+  <Commit hash="dbb6464">Dynamic model discovery from provider APIs. The UI stopped having any hardcoded model names.</Commit>
+  <Commit hash="0186c69">Split Codex mode from provider model mode in the agent selector toggle. These are two different things — Codex runs as a subprocess CLI, provider models go through <code>neumann_cloud</code> — and the UI was conflating them.</Commit>
+  <Commit hash="decc4ed">Removed the hardcoded OpenAI/Gemini fallback from the UI entirely. Dynamic discovery only, which meant the UI would show nothing if the server wasn't running — which is the right behavior.</Commit>
+  <Commit hash="0910dde">Empty-state hint when no provider models are discovered. Better than showing a broken empty dropdown.</Commit>
+  <Commit hash="cece2b4">Centralized tool definitions across all providers. OpenAI, Anthropic, and Gemini now share one canonical tool schema list instead of three diverging copies.</Commit>
+  <Commit hash="d3d8589">Authentication working in localhost. Session handling between the browser and the local server.</Commit>
+  <Commit hash="49a7a6b">Better error handling throughout; delete and batch delete for conversations in the sidebar.</Commit>
+  <Commit hash="1a049ed">Token usage tracking using <code>tracing</code>. The chat panel was accumulating per-turn token counts at two points in the render cycle — fixed by tracking in one place.</Commit>
+  <Commit hash="074924b">Context usage UI — input tokens, output tokens, reasoning tokens shown dynamically in the chat interface. Useful for understanding how much of the context window the agent was consuming.</Commit>
+  <Commit hash="9240ffc">Refactored agent model visibility; dynamic loading of enabled models; improved tool detail parsing in the activity stream so tool calls showed readable names instead of raw function identifiers.</Commit>
+  <Commit hash="23b5c17">AI reasoning, task, and chain-of-thought UI components. The agent's internal thinking steps now appear in a structured panel rather than mixed into the main message thread.</Commit>
+  <Commit hash="d6f5fd3">New conversation UI components with semantic activity stream titles. Instead of showing <code>str_replace_editor</code> the UI now shows "Editing file" in human-readable language.</Commit>
+  <Commit hash="a3c840a">Updated chain-of-thought and messages UI. The conversation flow was still rough — iterating on layout and information density.</Commit>
+  <Commit hash="c4f4ed3">Embedded browser panel with Tauri integration. The agent can open a URL and it renders inside the app rather than launching an external browser. Useful for previewing changes to web projects.</Commit>
+  <Commit hash="79603c7">Overall UI refresh. The layout was still basic but at this point it at least looked like it had been designed rather than assembled.</Commit>
+</CommitList>
+
+<IssueList>
+  <Issue title="Token double-counting">
+    The chat panel accumulated per-turn token usage at two separate points in the render cycle, inflating the displayed totals. Fixed by consolidating tracking into one place using <code>tracing</code> spans.
+  </Issue>
+  <Issue title="Stream keepalive missing">
+    Anthropic sends keepalive pings during long tool-use turns. Without handling them the HTTP connection would close after ~30 seconds and the agent response was lost silently — no error, no output, just nothing.
+  </Issue>
+  <Issue title="Model list hardcoded">
+    Three separate lists of model names, one per provider, all drifting out of sync. Switched to server-driven dynamic discovery. The hardcoded lists were removed entirely.
+  </Issue>
+  <Issue title="Tool definitions diverged across providers">
+    Each provider had its own copy of the tool schemas that had evolved independently. Centralized into a single list that all providers read from — one place to update when a tool changes.
+  </Issue>
+</IssueList>
+
+By the end of February the thing worked. Not polished, not fast, but it would take a task, run the agent, stream the response, and show you the output. That was the foundation. March was when it actually started to look like a product.
+
+<Note avatar="https://i.imgur.com/ZF1UFR0.jpeg">
+  "It works" is a humble milestone but an important one. January ended with something that compiled and accumulated bugs. February ended with something that did the thing it was supposed to do. That's a real difference.
+</Note>

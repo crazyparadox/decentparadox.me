@@ -1,0 +1,37 @@
+---
+import { Icon } from 'astro-icon/components'
+
+export interface Props {
+  hash: string
+  group?: string
+  repo?: string
+}
+
+const { hash, group, repo = 'decentparadox/neumann' } = Astro.props
+const githubUrl = `https://github.com/${repo}/commit/${hash}`
+---
+
+<div
+  class="group/commit hover:bg-muted/40 flex flex-col gap-1.5 px-4 py-3 text-sm transition-colors"
+>
+  <div class="flex items-start gap-3">
+    <a
+      href={githubUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="bg-muted text-muted-foreground hover:border-foreground/30 hover:text-foreground mt-0.5 flex shrink-0 items-center gap-1 rounded border px-1.5 py-0.5 font-mono text-[11px] no-underline transition-colors"
+      title={`View commit ${hash} on GitHub`}
+    >
+      {hash}
+      <Icon
+        name="lucide:arrow-up-right"
+        class="size-2.5 opacity-50 group-hover/commit:opacity-100"
+      />
+    </a>
+    <p
+      class="text-foreground/80 [&_code]:bg-muted leading-relaxed [&_code]:rounded [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[11px]"
+    >
+      <slot />
+    </p>
+  </div>
+</div>

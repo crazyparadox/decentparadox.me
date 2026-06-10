@@ -1,0 +1,245 @@
+---
+title: 'January 2026 — GPUI, VCS, and a Dead End'
+description: 'Neumann Devlog'
+date: '2026-05-04'
+authors: ['decentparadox']
+order: 1
+draft: true
+---
+
+import CommitList from '@/components/mdx/CommitList.astro'
+import Commit from '@/components/mdx/Commit.astro'
+import IssueList from '@/components/mdx/IssueList.astro'
+import Issue from '@/components/mdx/Issue.astro'
+import BlogFigure from '@/components/mdx/BlogFigure.astro'
+import Note from '@/components/mdx/Note.astro'
+
+<div class="invisible h-0! [&+*]:mt-0 [&+*_*]:mt-0">
+  ## January 2026 — GPUI, VCS, and a Dead End
+</div>
+
+January started with a refactor and ended with a decision to throw most of it away.
+
+The Jan 4 commit split the project into separate Rust crates — `neumann_domain`, `neumann_server`, `neumann_backend` and so on. That was the right architectural move. A monolithic crate is fine when a project is small; as soon as you want separate compilation units, clear dependency boundaries, and the ability to test the domain layer in isolation, you need the split. I did that early and it paid dividends for the rest of the project.
+
+Then I used an AI agent (ralph) to implement VCS features — git staging, status badges in the file tree, a diff viewer, status refresh with debouncing. This was an experiment in using an agentic coding loop for a non-trivial feature. It worked, mostly. The commits landed and the features were functional. But the GPUI renderer underneath was still the bottleneck.
+
+## The GPUI Problem
+
+The deeper issue was the framework itself. GPUI is built _for Zed_. It's not a general-purpose UI toolkit — the abstractions are shaped around how Zed works internally, and the documentation assumes you already understand Zed's architecture. Every fix I made felt like I was reading the source of a codebase I didn't own and guessing at which lever to pull.
+
+The feedback loop was punishing. GPUI compiles with the rest of the Rust binary — every UI tweak meant a full `cargo build`, 20 to 40 seconds per cycle. For layout iteration, where you want to see the result of a padding change in milliseconds, that's brutal. Browsers solve this with hot reload. GPUI does not.
+
+<BlogFigure
+  kind="Screenshot"
+  title="GPUI iteration loop placeholder"
+  description="A future screenshot here should show the January-era GPUI editor shell beside a terminal running repeated full Rust builds, to make the 20–40 second layout feedback loop feel concrete."
+  height={300}
+/>
+
+<Note avatar="https://i.imgur.com/ZF1UFR0.jpeg">
+  20–40 seconds per cycle sounds survivable until you realize how many cycles
+  layout iteration takes. You want to try ten different padding values. That's
+  4–7 minutes of staring at a progress bar for what should be instant feedback.
+</Note>
+
+By the end of January the issues had accumulated faster than I was fixing them: streaming markdown not rendering in real time, WebSocket state going stale after a refactor, cursor invisible on light backgrounds, layout not reflowing correctly. None catastrophic individually. Together they pointed at something structural.
+
+<CommitList>
+  <Commit hash="bfed72b">
+    Refactored the project into separate Rust crates —{' '}
+    <code>neumann_domain</code>, <code>neumann_server</code>,{' '}
+    <code>neumann_backend</code>, and friends. Clean dependency boundaries and
+    isolated compilation units.
+  </Commit>
+  <Commit hash="036c7da" group="VCS — Staging">
+    Implemented git staging operations — the ability to stage and unstage
+    individual files from within the editor.
+  </Commit>
+  <Commit hash="b477d22" group="VCS — Status">
+    Integrated VCS status badges into the file tree. Modified, added, and
+    deleted files now show a colored indicator next to their name.
+  </Commit>
+  <Commit hash="11f243c" group="VCS — Status">
+    Added <code>WorkspaceVcsState</code> to <code>AppState</code> — the domain
+    layer now owns VCS status as first-class state.
+  </Commit>
+  <Commit hash="ed3cd55" group="VCS — Status">
+    VCS status refresh controller with debouncing — status updates when files
+    change, but not on every keystroke.
+  </Commit>
+  <Commit hash="31c763c" group="VCS — Diff">
+    Git diff, changed files list, commit, and current branch — the full
+    read-side of git status exposed through the server.
+  </Commit>
+  <Commit hash="fbdbf54" group="VCS — Diff">
+    Jujutsu (jj) provider — git diff and status for repos using jj instead of
+    git.
+  </Commit>
+  <Commit hash="e190d7a" group="VCS — Diff">
+    Diff parsing structures and <code>DiffViewState</code> — the domain types
+    that back the diff viewer UI.
+  </Commit>
+  <Commit hash="39371d0" group="VCS — Diff">
+    Diff viewer UI component with virtualization — renders large diffs without
+    hanging the browser by only mounting visible rows.
+  </Commit>
+  <Commit hash="d93f65f" group="VCS — Diff">
+    Integrated the diff viewer into the workspace view — click a changed file,
+    see its diff inline.
+  </Commit>
+  <Commit hash="d529a16" group="VCS — Diff">
+    Git staged/unstaged toggle controls — switch the diff view between what's
+    staged and what's modified.
+  </Commit>
+  <Commit hash="ca38d5d" group="VCS — Diff">
+    Auto-load diff on file click — selecting a file in the VCS panel now
+    automatically shows its diff without an extra click.
+  </Commit>
+</CommitList>
+
+<IssueList>
+  <Issue
+    title="Stabilize the GPUI editor shell"
+    id="NEU-1"
+    age="4mo"
+    priority="urgent"
+    status="abandoned"
+    stage="Abandoned"
+    due="Jan 31"
+    team="neumann"
+  >
+    January's main UI track turned into framework triage. The issues below were
+    not isolated paper cuts; they clustered around the same architectural
+    problem and eventually forced the browser rewrite.
+  </Issue>
+  <Issue
+    title="GPUI blocks reflow"
+    id="NEU-5"
+    age="2mo"
+    priority="high"
+    status="blocked"
+    stage="Blocked"
+    due="Jan 12"
+    team="neumann"
+  >
+    Block layout didn't reflow correctly under certain conditions. Extension
+    traits required for GPUI components weren't in scope, causing compilation
+    failures. Every fix required understanding GPUI's internal layout model
+    rather than applying standard patterns.
+  </Issue>
+  <Issue
+    title="GPUI terminal cursor invisible on light backgrounds"
+    id="NEU-6"
+    age="2mo"
+    priority="high"
+    status="progress"
+    stage="In Progress"
+    due="Jan 15"
+    team="neumann"
+  >
+    Cursor disappeared on light themes — a core usability issue on the most
+    important interaction surface. Rooted in how GPUI layers the cursor render
+    on top of background fills; required understanding the render pipeline to
+    fix.
+  </Issue>
+  <Issue
+    title="Agent run messages not rendering in real time"
+    id="NEU-9"
+    age="2mo"
+    priority="medium"
+    status="todo"
+    stage="Todo"
+    due="Jan 18"
+    team="neumann"
+  >
+    Assistant messages that arrived during an active run weren't shown until you
+    reopened the conversation. The tool felt frozen even while the agent was
+    actively working — the worst kind of UX failure because it looks like a
+    hang.
+  </Issue>
+  <Issue
+    title="WebSocket connection state stale"
+    id="NEU-11"
+    age="2mo"
+    priority="high"
+    status="todo"
+    stage="Todo"
+    due="Jan 19"
+    team="neumann"
+  >
+    A provider refactor stopped exposing the transport's connection flag to the
+    rest of the app. The UI showed incorrect online/offline state and reconnect
+    flows couldn't be trusted to fire.
+  </Issue>
+  <Issue
+    title="Kanban excluded main worktree"
+    id="NEU-14"
+    age="2mo"
+    priority="medium"
+    status="done"
+    stage="Done"
+    due="Jan 21"
+    team="neumann"
+  >
+    The kanban view filtered out the main worktree — it never appeared in the
+    list even when it was the active workspace.
+  </Issue>
+  <Issue
+    title="Duplicate projects from overlapping paths"
+    id="NEU-16"
+    age="2mo"
+    priority="medium"
+    status="done"
+    stage="Done"
+    due="Jan 22"
+    team="neumann"
+  >
+    Loading persisted state with repeated worktree paths produced duplicate
+    workspace entries, which broke strict UI selectors and made the workspace
+    list confusing.
+  </Issue>
+  <Issue
+    title="Thinking steps miscount"
+    id="NEU-18"
+    age="2mo"
+    priority="low"
+    status="review"
+    stage="In Review"
+    due="Jan 24"
+    team="neumann"
+  >
+    TODO list output from the agent was parsed as "thinking steps", inflating
+    the count. Patches oscillated between overcounting and undercounting — a
+    sign the root cause wasn't understood.
+  </Issue>
+  <Issue
+    title="Task intent output unstable"
+    id="NEU-20"
+    age="2mo"
+    priority="medium"
+    status="backlog"
+    stage="Backlog"
+    due="Jan 26"
+    team="neumann"
+  >
+    The "Create Task" inference step sometimes returned rationale text instead
+    of a structured intent kind, making downstream rendering inconsistent and
+    breaking the task preview UI.
+  </Issue>
+</IssueList>
+
+## The Decision
+
+The decision to scrap GPUI came down to one question: how much of my time was I spending building the editor versus fighting the framework?
+
+The answer was too much. The browser is already a great UI runtime — hot reload, flexbox that works, a debugger that isn't fighting you, DevTools, and a decade of tooling refinement. Fighting all of that to stay in a single language wasn't principled engineering. It was stubbornness.
+
+<Note avatar="https://i.imgur.com/ZF1UFR0.jpeg">
+  The VCS work survived the rewrite almost entirely. The January commits weren't
+  wasted — the domain types and git logic ported over cleanly because I'd put
+  them in their own crate, isolated from the UI. Good architecture paying off
+  earlier than expected.
+</Note>
+
+February was a full rewrite. Rust server on loopback, Next.js browser UI, WebSocket between them. The VCS work from January survived — the domain types and git logic ported over cleanly, because the crate split in January had made them independent of the UI layer.

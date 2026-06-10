@@ -24,6 +24,7 @@
     "@astrojs/sitemap": "^3.4.0",
     "@expressive-code/plugin-collapsible-sections": "^0.40.2",
     "@expressive-code/plugin-line-numbers": "^0.40.2",
+    "@fact0/sdk": "^1.0.2",
     "@iconify-json/lucide": "^1.2.26",
     "@neondatabase/serverless": "^1.0.1",
     "@netlify/blobs": "^8.1.0",

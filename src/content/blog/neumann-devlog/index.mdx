@@ -1,0 +1,21 @@
+---
+title: "Neumann Devlog"
+description: 'Month-by-month log of building a localhost AI code editor in Rust — the decisions, the rewrites, the postmortems, and what actually shipped.'
+authors: ['decentparadox']
+date: '2026-05-04'
+tags: ['rust', 'ai', 'devlog', 'editor']
+image: './DevlogLight.png'
+darkimage: './DevlogDark.png'
+---
+
+import AllSubposts from '@/components/mdx/AllSubposts.astro'
+
+> **Draft.** This devlog is still being written. The monthly entries aren't published yet; check back soon.
+
+I started building **Neumann** on Christmas Eve 2025. It’s a local AI code editor; it consists of a Rust server running on your computer, a browser-based UI also served from the local origin, and WebSockets for communication. No cloud, no auth. Only loopback binding.
+
+Initially, it ran using GPUI (the same as Zed's UI library). That lasted for a week. In February, I threw everything away and started over with Next.js. In March, Neumann had an IDE-like layout, with files tree, console, and CLI built in. In April, I was busy porting functionality from Warp and implementing features faster than I could write documentation about them.
+
+This is the month-to-month history of how it all happened. Every significant commit and every bug bite recorded immediately after.
+
+<AllSubposts parentId="neumann-devlog" />

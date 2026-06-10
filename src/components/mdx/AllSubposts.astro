@@ -1,0 +1,42 @@
+---
+import { getPostReadingTime, getSubpostsForParent } from '@/lib/data-utils'
+import { Icon } from 'astro-icon/components'
+
+export interface Props {
+  parentId: string
+}
+
+const { parentId } = Astro.props
+const subposts = await getSubpostsForParent(parentId)
+const subpostsWithTime = await Promise.all(
+  subposts.map(async (subpost) => ({
+    ...subpost,
+    readingTime: await getPostReadingTime(subpost.id),
+  })),
+)
+---
+
+<div class="not-prose mt-6 flex flex-col gap-2">
+  {
+    subpostsWithTime.map((subpost) => (
+      <a
+        href={`/blog/${subpost.id}`}
+        class="hover:bg-muted group flex items-center justify-between border px-3 py-3 no-underline transition-colors duration-200"
+      >
+        <div class="flex items-center gap-3">
+          <Icon name="lucide:file-text" class="size-4 shrink-0" />
+          <div class="flex flex-col">
+            <div class="font-medium">{subpost.data.title}</div>
+            <div class="text-muted-foreground text-xs">
+              {subpost.readingTime}
+            </div>
+          </div>
+        </div>
+        <Icon
+          name="lucide:arrow-right"
+          class="size-4 shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+        />
+      </a>
+    ))
+  }
+</div>
