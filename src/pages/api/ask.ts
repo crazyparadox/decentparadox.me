@@ -100,12 +100,60 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       .catch((err) => console.error('Fact0 audit (start) failed:', err))
   }
 
+  // Open a telemetry execution for this run. We hold the promise so the
+  // onFinish/onError handlers can attach spans once the id resolves, but we
+  // never await it on the request path — telemetry latency must not block
+  // the stream.
+  const runStart = new Date().toISOString()
+  const executionPromise = fact0
+    ? fact0.telemetry
+        .startExecution({
+          agent_id: 'ask-sasank-agent',
+          agent_name: 'Ask Sasank',
+          trigger: 'chat_message',
+          metadata: { githubLogin: session.login, runId },
+        })
+        .then((execution) => execution.id as string)
+        .catch((err) => {
+          console.error('Fact0 telemetry (start) failed:', err)
+          return null
+        })
+    : null
+
+  // Record the execution's spans and close it out. Chains off the start
+  // promise so the spans always carry a valid executionId.
+  const finalizeTelemetry = (status: string, modelEnd: string) => {
+    if (!executionPromise) return
+    void executionPromise
+      .then(async (executionId) => {
+        if (!executionId) return
+        await fact0!.telemetry.ingestSpans(executionId, [
+          {
+            span_id: 'run',
+            name: 'ask-sasank run',
+            start_time: runStart,
+            end_time: modelEnd,
+          },
+          {
+            span_id: 'llm-stream',
+            name: 'LLM stream (gemini-2.5-flash)',
+            parent_span_id: 'run',
+            start_time: runStart,
+            end_time: modelEnd,
+          },
+        ])
+        await fact0!.telemetry.endExecution(executionId, status)
+      })
+      .catch((err) => console.error('Fact0 telemetry (finalize) failed:', err))
+  }
+
   try {
     const result = streamText({
       model: google('gemini-2.5-flash'),
       system: SYSTEM_PROMPT,
       messages: convertToModelMessages(messages),
       onFinish: ({ text, finishReason }) => {
+        finalizeTelemetry('success', new Date().toISOString())
         if (!fact0) return
         void fact0.audit
           .log({
@@ -127,6 +175,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     return result.toUIMessageStreamResponse()
   } catch (error: any) {
+    finalizeTelemetry('error', new Date().toISOString())
     if (fact0) {
       void fact0.audit
         .log({
