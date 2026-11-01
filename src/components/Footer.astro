@@ -1,57 +1,178 @@
-  <section class="flex w-full flex-col gap-16 pt-6 max-w-screen-xl mx-auto">
-    <div class="w-full">
-      <img 
-        src="/static/images/Footer.svg" 
-        alt="Footer" 
-        class="w-full h-full dark:hidden" 
-      />
-      <img 
-        src="/static/images/FooterDark.svg" 
-        alt="Footer" 
-        class="w-full h-full hidden dark:block" 
-      />
-    </div>
+---
+const email = 'hello@decentparadox.me'
 
-    <!-- <div class="flex w-full flex-row-reverse justify-between">
-      <div class="flex h-4 items-center gap-4">
-        <a
-          href="https://amrita.town/prev"
-          class="text-sm font-medium uppercase text-primary hover:brightness-125 dark:hover:brightness-125"
-        >
-          <div class="h-4 w-4 rotate-90 fill-accent">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 100">
-              <path
-                d="M70.4,58.9L70.1,57l-0.2-0.9c0,0,0,0,0,0l-0.2-0.9c-18.7,3.4-27.6,13.4-31.9,22.7V3h-0.9H35h-0.9v75.3c-4.2-9.7-13.2-20.2-31.9-23.2L1.9,57L1.7,58c0,0,0,0,0,0l-0.1,0.9c28.7,4.5,32.2,27.6,32.5,35.3c-0.1,1.7,0,2.7,0,2.8l0.9-0.1v0l0.5,0l2.4,0.1c0,0,0-0.6,0-1.5v-2.5C38.4,84.4,42.5,63.9,70.4,58.9z"
-              ></path>
-            </svg>
-          </div>
-        </a>
+const nav = ['index', 'blog', 'projects', 'about', 'guestbook']
+---
 
+<footer class="mt-24 w-full font-sans">
+  <div class="grid grid-cols-1 md:grid-cols-2">
+    <!-- LEFT — light panel -->
+    <div
+      data-left-panel
+      class="relative flex min-h-[420px] flex-col justify-between bg-background px-6 py-8 md:px-10 md:py-10"
+    >
+      <div class="flex flex-col gap-1">
+        <p class="text-3xl leading-none tracking-tight text-muted-foreground md:text-5xl">
+          start a project
+        </p>
         <a
-          href="https://amrita.town/random"
-          class="fill-accent text-sm font-medium uppercase text-accent hover:brightness-125 dark:hover:brightness-125"
+          href={`mailto:${email}`}
+          data-email-cta
+          class="w-fit text-3xl leading-tight tracking-tight text-foreground transition-colors duration-200 hover:text-accent md:text-5xl"
         >
-          <Dices />
-        </a>
-
-        <a
-          href="https://amrita.town/next"
-          class="text-sm font-medium uppercase text-primary hover:brightness-125 dark:hover:brightness-125"
-        >
-          <div class="h-4 w-4 -rotate-90 fill-accent">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 100">
-              <path
-                d="M70.4,58.9L70.1,57l-0.2-0.9c0,0,0,0,0,0l-0.2-0.9c-18.7,3.4-27.6,13.4-31.9,22.7V3h-0.9H35h-0.9v75.3c-4.2-9.7-13.2-20.2-31.9-23.2L1.9,57L1.7,58c0,0,0,0,0,0l-0.1,0.9c28.7,4.5,32.2,27.6,32.5,35.3c-0.1,1.7,0,2.7,0,2.8l0.9-0.1v0l0.5,0l2.4,0.1c0,0,0-0.6,0-1.5v-2.5C38.4,84.4,42.5,63.9,70.4,58.9z"
-              ></path>
-            </svg>
-          </div>
+          {email}
         </a>
       </div>
-      <a
-        href="https://amrita.town/"
-        class="h-full self-center text-sm font-medium uppercase text-primary hover:brightness-125 dark:hover:brightness-125"
+
+      <!-- interactive kaomoji wordmark -->
+      <div class="relative mt-12">
+        <span
+          class="absolute -top-6 right-4 text-2xl text-foreground md:right-12"
+          aria-hidden="true">&copy;</span
+        >
+        <div
+          id="kaomoji"
+          role="button"
+          tabindex="0"
+          aria-label="A little face that follows your cursor. Click to change its mood."
+          class="inline-block cursor-pointer select-none font-supply text-[18vw] font-bold leading-none tracking-tighter text-foreground transition-transform duration-150 ease-out will-change-transform md:text-[9vw]"
+        >
+          [ +_+ ]
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT — accent inset panel -->
+    <div
+      class="relative min-h-[420px] overflow-hidden rounded-tl-xl bg-accent px-6 py-8 text-accent-foreground md:px-10 md:py-10"
+    >
+      <!-- corner crop marks -->
+      <span class="pointer-events-none absolute right-4 top-4 h-4 w-4 border-r border-t border-accent-foreground/40"></span>
+      <span class="pointer-events-none absolute bottom-4 left-4 h-4 w-4 border-b border-l border-accent-foreground/40"></span>
+
+      <!-- directory -->
+      <div class="flex flex-col gap-6 font-supply text-sm">
+        <div>
+          <p class="text-xs uppercase tracking-[0.12em] text-accent-foreground/60">[ nav ]</p>
+          <p class="mt-1 uppercase tracking-[0.06em]">
+            {
+              nav.map((label, i) => (
+                <a
+                  href={label === 'index' ? '/' : `/${label}`}
+                  class="transition-opacity duration-200 hover:opacity-60"
+                >
+                  {label}
+                  {i < nav.length - 1 ? ', ' : ''}
+                </a>
+              ))
+            }
+          </p>
+        </div>
+
+        <div>
+          <p class="text-xs uppercase tracking-[0.12em] text-accent-foreground/60">[ socials ]</p>
+          <p class="mt-1 uppercase tracking-[0.06em]">
+            <a href="https://twitter.com/0xdecentparadox" target="_blank" rel="noopener noreferrer" class="transition-opacity duration-200 hover:opacity-60">x/twitter, </a>
+            <a href="https://github.com/decentparadox" target="_blank" rel="noopener noreferrer" class="transition-opacity duration-200 hover:opacity-60">github, </a>
+            <a href="https://t.me/decentparadox" target="_blank" rel="noopener noreferrer" class="transition-opacity duration-200 hover:opacity-60">telegram</a>
+          </p>
+        </div>
+
+        <div>
+          <p class="text-xs uppercase tracking-[0.12em] text-accent-foreground/60">[ webring ]</p>
+          <p class="mt-1 uppercase tracking-[0.06em]">
+            <a href="https://amrita.town" target="_blank" rel="noopener noreferrer" class="transition-opacity duration-200 hover:opacity-60">amrita.town, </a>
+            <a href="https://amrita.town/prev" target="_blank" rel="noopener noreferrer" class="transition-opacity duration-200 hover:opacity-60">prev, </a>
+            <a href="https://amrita.town/random" target="_blank" rel="noopener noreferrer" class="transition-opacity duration-200 hover:opacity-60">random, </a>
+            <a href="https://amrita.town/next" target="_blank" rel="noopener noreferrer" class="transition-opacity duration-200 hover:opacity-60">next</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- center crosshair -->
+      <span
+        class="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-supply text-2xl text-accent-foreground/40"
+        aria-hidden="true">+</span
       >
-        <p>Amrita.town</p>
-      </a>
-    </div> -->
-  </section>
+
+      <!-- bottom-right system mark -->
+      <div class="absolute bottom-6 right-6 flex items-end gap-3">
+        <span class="font-supply text-xs text-accent-foreground/70" aria-hidden="true">+_+&#8482;</span>
+        <span
+          class="hidden h-7 w-24 sm:block"
+          aria-hidden="true"
+          style="background-image: repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 3px, currentColor 3px 5px, transparent 5px 6px, currentColor 6px 9px, transparent 9px 11px, currentColor 11px 12px, transparent 12px 16px);"
+        ></span>
+        <div class="flex flex-col items-end font-supply text-[10px] uppercase tracking-[0.1em] text-accent-foreground/70">
+          <span>decentparadox</span>
+          <span>&copy;2026</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script is:inline define:vars={{ email }}>
+  // Click-to-copy email
+  document.querySelectorAll('[data-email-cta]').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      if (!navigator.clipboard) return
+      e.preventDefault()
+      navigator.clipboard.writeText(email).then(() => {
+        const original = link.textContent
+        link.textContent = 'copied [ ^ - ^ / ]'
+        setTimeout(() => {
+          link.textContent = original
+        }, 1500)
+      })
+    })
+  })
+
+  // Interactive kaomoji: follows the cursor, changes mood on hover / click
+  const k = document.getElementById('kaomoji')
+  const panel = document.querySelector('[data-left-panel]')
+  if (k && panel) {
+    const faces = [
+      '[ +_+ ]',
+      '[ o_o ]',
+      '[ ^_^ ]',
+      '[ -_- ]',
+      '[ >_< ]',
+      '[ @_@ ]',
+      '[ ಠ_ಠ ]',
+      '[ ^‿^ ]',
+    ]
+    let idx = 0
+    let resting = faces[0]
+
+    const cycle = () => {
+      idx = (idx + 1) % faces.length
+      resting = faces[idx]
+      k.textContent = resting
+    }
+    k.addEventListener('click', cycle)
+    k.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        cycle()
+      }
+    })
+    k.addEventListener('mouseenter', () => {
+      k.textContent = '[ ^_^ ]'
+    })
+    k.addEventListener('mouseleave', () => {
+      k.textContent = resting
+    })
+
+    // Parallax: face leans toward the cursor across the panel
+    panel.addEventListener('mousemove', (e) => {
+      const r = panel.getBoundingClientRect()
+      const dx = ((e.clientX - r.left) / r.width - 0.5) * 18
+      const dy = ((e.clientY - r.top) / r.height - 0.5) * 12
+      k.style.transform = `translate(${dx}px, ${dy}px)`
+    })
+    panel.addEventListener('mouseleave', () => {
+      k.style.transform = 'translate(0, 0)'
+    })
+  }
+</script>

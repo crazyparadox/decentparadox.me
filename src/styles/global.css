@@ -9,10 +9,8 @@
   --font-supply:
     supply-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     'Liberation Mono', 'Courier New', monospace;
-  --font-serif:  PPEditorial, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
-  'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  --font-serifItalic: PPEditorialItalic, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
-  'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-serif: 'Geist Serif', 'Times New Roman', Times, serif;
+  --font-serifItalic: 'Geist Serif', 'Times New Roman', Times, serif;
   --font-geistPixel: GeistPixelGrid, ui-monospace, monospace;
   --font-instrument: InstrumentSerif, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
   'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
@@ -124,13 +122,11 @@
 }
 
 @font-face {
-  font-family: "PPEditorial";
-  src: url("/fonts/PPEditorialNew-Regular.ttf") format("truetype");
-}
-
-@font-face {
-  font-family: "PPEditorialItalic";
-  src: url("/fonts/PPEditorialNew-Italic.ttf") format("truetype");
+  font-family: "Geist Serif";
+  src: url("/fonts/GeistSerif-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
