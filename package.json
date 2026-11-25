@@ -13,8 +13,8 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.46",
-    "@ai-sdk/react": "^2.0.115",
+    "@ai-sdk/google": "2.0.46",
+    "@ai-sdk/react": "2.0.115",
     "@astrojs/check": "^0.9.4",
     "@astrojs/markdown-remark": "^6.3.1",
     "@astrojs/mdx": "^4.2.6",
@@ -44,7 +44,7 @@
     "@types/react": "19.0.1",
     "@types/react-dom": "19.0.1",
     "@xyflow/react": "^12.10.0",
-    "ai": "^5.0.113",
+    "ai": "5.0.113",
     "astro": "^5.7.13",
     "astro-expressive-code": "^0.40.2",
     "astro-icon": "^1.1.5",
@@ -104,5 +104,10 @@
       "esbuild",
       "sharp"
     ]
+  },
+  "overrides": {
+    "@ai-sdk/provider-utils": "3.0.19",
+    "@ai-sdk/gateway": "2.0.21",
+    "@ai-sdk/provider": "2.0.0"
   }
 }
