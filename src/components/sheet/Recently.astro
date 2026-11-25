@@ -1,7 +1,6 @@
 ---
 // The last song played and the last film logged, as two small cards: cover, title, one line under it.
-// Fetched in the browser from the same two public feeds the old site used (Last.fm via a small proxy,
-// Letterboxd's RSS via rss2json), so they are current without a rebuild. Each card is a grey skeleton until its feed
+// Fetched in the browser (Spotify through /api/spotify, Letterboxd's RSS via rss2json), so they are current without a rebuild. Each card is a grey skeleton until its feed
 // answers; a card whose feed fails removes itself. With no script, nothing shows.
 ---
 
@@ -44,18 +43,11 @@
       card.href = href
       card.classList.remove('is-loading')
     }
-    fetch('https://lastfm-last-played.biancarosa.com.br/decentparadox/latest-song')
-      .then((r) => r.json())
+    fetch('/api/spotify')
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then(({ track }) => {
         if (!track) return drop(song)
-        const art = (track.image || []).map((i) => i['#text']).filter(Boolean).pop()
-        fill(song, {
-          title: track.name,
-          sub: track.artist && track.artist['#text'],
-          art,
-          href: track.url,
-          kind: track['@attr'] && track['@attr'].nowplaying === 'true' ? 'listening now' : 'last played',
-        })
+        fill(song, { title: track.name, sub: track.artist, art: track.art, href: track.url, kind: track.playing ? 'listening now' : 'last played' })
       })
       .catch(() => drop(song))
     fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fletterboxd.com%2Fdecentparadox%2Frss')

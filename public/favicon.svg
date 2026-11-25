@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" fill="#1f3bff"/>
+  <!-- close-up of the mascot's notched ear, rising out of the bottom right corner -->
+  <path fill="#fff" d="M15.500 70 14.500 45.500 11.500 41l11.500 3.500L25.500 36.500 14.500 32C14 24 13.500 15 16.500 10.500c2.300-3.400 6.500-2.900 9.500.600C40 27 56 49 70 61v9Z"/>
+</svg>
