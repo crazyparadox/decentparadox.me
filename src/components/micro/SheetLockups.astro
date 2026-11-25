@@ -1,0 +1,120 @@
+---
+// High-fidelity lockups for the footer drawing sheet.
+// Solid marks, 1.75px icon strokes, justified mono type — drawn in currentColor
+// (accent-foreground on the accent sheet). Animations run only once the sheet
+// is revealed (.is-in), so without JS everything renders in its final state.
+
+const ticks = Array.from({ length: 11 }, (_, i) => i) // ruler: 10 divisions
+const bars = [3, 1, 3, 1, 2, 1, 3, 2, 1, 3, 1, 2, 1, 12] // barcode, ends in a block
+const barW = bars.reduce((a, w) => a + w * 2, 0) + (bars.length - 1) * 3
+---
+
+<!-- symbol library: the logomark and icons, defined once -->
+<svg width="0" height="0" class="absolute" aria-hidden="true">
+  <defs>
+    <mask id="lk-mark-mask">
+      <rect width="24" height="24" fill="white"></rect>
+      <ellipse cx="8.1" cy="13.2" rx="1.75" ry="4.1" transform="rotate(-6 8.1 13.2)" fill="black"></ellipse>
+      <ellipse cx="13.3" cy="13.2" rx="1.75" ry="4.1" transform="rotate(-6 13.3 13.2)" fill="black"></ellipse>
+    </mask>
+    <symbol id="lk-mark" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="11.5" fill="currentColor" mask="url(#lk-mark-mask)"></circle>
+    </symbol>
+    <symbol id="lk-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+      <circle cx="12" cy="12" r="10"></circle>
+      <ellipse cx="12" cy="12" rx="4.4" ry="10"></ellipse>
+      <path d="M2 12h20M3.6 7.2c5.2 1.8 11.6 1.8 16.8 0M3.6 16.8c5.2-1.8 11.6-1.8 16.8 0"></path>
+    </symbol>
+    <symbol id="lk-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+      <rect x="2" y="2" width="20" height="20" rx="2.5"></rect>
+      <path d="M9.2 7.5 5.4 12l3.8 4.5M14.8 7.5l3.8 4.5-3.8 4.5"></path>
+    </symbol>
+    <symbol id="lk-spark" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M12 1.5c.75 5.4 2.7 8.1 9 10.5-6.3 2.4-8.25 5.1-9 10.5-.75-5.4-2.7-8.1-9-10.5 6.3-2.4 8.25-5.1 9-10.5Z"></path>
+    </symbol>
+    <symbol id="lk-return" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 9V7.5A3.5 3.5 0 0 0 16.5 4h-10A3.5 3.5 0 0 0 3 7.5V9a3.5 3.5 0 0 0 3.5 3.5H9"></path>
+      <path d="M9 12.5V17h9"></path>
+      <path d="M15 14l3 3-3 3"></path>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="lk-sheet grid grid-cols-1 gap-x-16 gap-y-12 xl:grid-cols-2">
+  <!-- ① wordmark lockup ------------------------------------------------- -->
+  <div class="lk-block" aria-hidden="true">
+    <p class="lk-wordmark">decentparadox<sup>®</sup></p>
+
+    <svg class="lk-ruler mt-3 w-full" viewBox="0 0 300 14" preserveAspectRatio="none" height="14">
+      <line x1="0" y1="1" x2="300" y2="1" stroke="currentColor" stroke-width="2"></line>
+      {
+        ticks.map((i) => (
+          <line
+            class="lk-tick"
+            style={`--d:${i * 45}ms`}
+            x1={i * 30 + (i === 0 ? 1 : i === 10 ? -1 : 0)}
+            x2={i * 30 + (i === 0 ? 1 : i === 10 ? -1 : 0)}
+            y1="1"
+            y2={i % 2 === 0 ? 14 : 8}
+            stroke="currentColor"
+            stroke-width="2"
+          />
+        ))
+      }
+    </svg>
+
+    <div class="mt-3 flex items-center justify-between">
+      <span class="lk-serial"><b>e</b><span>0026</span><b>11</b></span>
+      <span class="flex items-center gap-3">
+        <svg class="lk-icon" width="24" height="24"><use href="#lk-globe"></use></svg>
+        <svg class="lk-icon" width="24" height="24"><use href="#lk-code"></use></svg>
+        <svg class="lk-icon" width="24" height="24"><use href="#lk-spark"></use></svg>
+      </span>
+    </div>
+
+    <div class="mt-3 flex items-center justify-between gap-3">
+      <svg width="22" height="22" class="shrink-0"><use href="#lk-return"></use></svg>
+      <span class="lk-strike" data-scramble>good enough</span>
+      <span class="lk-pill" data-scramble>rev.a</span>
+    </div>
+  </div>
+
+  <!-- ② workbench lockup — the contact side of the sheet --------------- -->
+  <div class="lk-block max-w-[520px] xl:max-w-none" aria-hidden="true">
+    <div class="flex items-start justify-between gap-4">
+      <div class="flex flex-col">
+        <span class="lk-title" data-scramble>the workbench</span>
+        <span class="lk-sub">side_quests</span>
+        <span class="lk-sub">late_night_builds</span>
+      </div>
+      <svg class="lk-barcode shrink-0" width="76" height="40" viewBox={`0 0 ${barW} 40`} preserveAspectRatio="none">
+        {
+          (() => {
+            let x = 0
+            return bars.map((w, i) => {
+              const r = <rect style={`--d:${i * 40}ms`} x={x} y="0" width={w * 2} height="40" fill="currentColor" />
+              x += w * 2 + 3
+              return r
+            })
+          })()
+        }
+      </svg>
+    </div>
+
+    <div class="mt-5 grid grid-cols-[72px_1fr] items-center gap-4">
+      <!-- bracket frame: the only place the mark appears -->
+      <div class="lk-frame relative grid place-items-center">
+        <span class="lk-corner left-0 top-0 border-l-2 border-t-2"></span>
+        <span class="lk-corner right-0 top-0 border-r-2 border-t-2"></span>
+        <span class="lk-corner bottom-0 left-0 border-b-2 border-l-2"></span>
+        <span class="lk-corner bottom-0 right-0 border-b-2 border-r-2"></span>
+        <svg width="30" height="30"><use href="#lk-mark"></use></svg>
+      </div>
+      <div class="flex flex-col gap-2">
+        <span class="lk-prompt">&gt;&gt;_say_hello<span class="lk-caret"></span></span>
+        <span class="lk-row">answered by a human</span>
+      </div>
+    </div>
+
+  </div>
+</div>

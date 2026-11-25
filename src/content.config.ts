@@ -47,4 +47,15 @@ const projects = defineCollection({
     }),
 })
 
-export const collections = { blog, authors, projects }
+// Short notes for /microblog. The file name is the permalink; the body is ordinary markdown
+// (a paragraph or two, links, an image or a video).
+const microblog = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/microblog' }),
+  schema: z.object({
+    title: z.string(),
+    date: z.coerce.date(),
+    draft: z.boolean().optional(),
+  }),
+})
+
+export const collections = { blog, authors, projects, microblog }

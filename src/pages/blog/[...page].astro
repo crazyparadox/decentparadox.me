@@ -1,10 +1,10 @@
 ---
-import BlogCard from '@/components/BlogCard.astro'
-import Breadcrumbs from '@/components/Breadcrumbs.astro'
 import PageHead from '@/components/PageHead.astro'
+import PageIntro from '@/components/sheet/PageIntro.astro'
 import PaginationComponent from '@/components/ui/pagination'
 import { SITE } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
+import { stamp } from '@/lib/ago'
 import { getAllPosts, groupPostsByYear } from '@/lib/data-utils'
 import type { PaginateFunction } from 'astro'
 
@@ -23,36 +23,41 @@ const postsByYear = groupPostsByYear(page.data)
 const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
 ---
 
-<Layout class="">
-  <PageHead slot="head" title="Blog" />
-  <Breadcrumbs
-    items={[
-      { label: 'Blog', href: '/blog', icon: 'lucide:library-big' },
-      { label: `Page ${page.currentPage}`, icon: 'lucide:book-copy' },
-    ]}
-  />
+<Layout plain>
+  <PageHead slot="head" title="Blog" description="Longer writing by Sasank Reddy on building software and the occasional security write-up." />
+  <PageIntro label="blog" count={page.total}>
+    longer writing, for when a short note isn't <em data-scribble="underline">enough</em>.
+    <img slot="art" class="dp-scene dp-scene--blend" src="/static/images/character/scene-blog-blend.webp" alt="The mascot sitting on a vintage typewriter with a coffee, pressing a key with his foot" />
+  </PageIntro>
 
-  <div class="flex min-h-[calc(100vh-18rem)] flex-col gap-y-8">
+  <div class="dp-list">
     {
       years.map((year) => (
-        <section class="flex flex-col gap-y-4">
-          <div class="font-medium">{year}</div>
-          <ul class="flex flex-col gap-4">
+        <section class="dp-grid dp-list__year">
+          <p class="dp-micro dp-micro--ink dp-list__label">{year}</p>
+          <div class="dp-list__rows">
             {postsByYear[year].map((post) => (
-              <li>
-                <BlogCard entry={post} />
-              </li>
+              <a class="dp-post dp-post--lead" href={`/${post.collection}/${post.id}`}>
+                <span class="dp-post__n">{stamp(post.data.date).slice(5)}</span>
+                <span>
+                  <h2 class="dp-post__title">{post.data.title}</h2>
+                  <p class="dp-body">{post.data.description}</p>
+                </span>
+                <span class="dp-micro dp-micro--faint">{stamp(post.data.date)}</span>
+              </a>
             ))}
-          </ul>
+          </div>
         </section>
       ))
     }
   </div>
 
-  <PaginationComponent
-    currentPage={page.currentPage}
-    totalPages={page.lastPage}
-    baseUrl="/blog/"
-    client:load
-  />
+  <div class="dp-pager">
+    <PaginationComponent
+      currentPage={page.currentPage}
+      totalPages={page.lastPage}
+      baseUrl="/blog/"
+      client:load
+    />
+  </div>
 </Layout>

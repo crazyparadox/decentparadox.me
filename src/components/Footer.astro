@@ -1,15 +1,32 @@
 ---
+import SheetLockups from '@/components/micro/SheetLockups.astro'
+
 const email = 'hello@decentparadox.me'
 
 const nav = ['index', 'blog', 'projects', 'about', 'guestbook']
+const elsewhere = [
+  { label: 'x/twitter', href: 'https://twitter.com/decentparadox' },
+  { label: 'github', href: 'https://github.com/crazyparadox' },
+  { label: 'telegram', href: 'https://t.me/decentparadox' },
+]
+const webring = [
+  { label: 'amrita.town', href: 'https://amrita.town' },
+  { label: 'prev', href: 'https://amrita.town/prev' },
+  { label: 'random', href: 'https://amrita.town/random' },
+  { label: 'next', href: 'https://amrita.town/next' },
+]
+// Revision = date this page was built.
+const rev = new Date().toISOString().slice(0, 10).replaceAll('-', '.')
+const zonesX = ['a', 'b', 'c', 'd']
+const zonesY = ['1', '2', '3']
 ---
 
 <footer class="mt-24 w-full font-sans">
   <div class="grid grid-cols-1 md:grid-cols-2">
-    <!-- LEFT — light panel -->
+    <!-- LEFT — contact + the paradox (the logomark, alive) -->
     <div
       data-left-panel
-      class="relative flex min-h-[420px] flex-col justify-between bg-background px-6 py-8 md:px-10 md:py-10"
+      class="relative flex min-h-[460px] flex-col justify-between bg-background px-6 py-8 md:px-10 md:py-10"
     >
       <div class="flex flex-col gap-1">
         <p class="text-3xl leading-none tracking-tight text-muted-foreground md:text-5xl">
@@ -24,88 +41,109 @@ const nav = ['index', 'blog', 'projects', 'about', 'guestbook']
         </a>
       </div>
 
-      <!-- interactive kaomoji wordmark -->
-      <div class="relative mt-12">
-        <span
-          class="absolute -top-6 right-4 text-2xl text-foreground md:right-12"
-          aria-hidden="true">&copy;</span
-        >
-        <div
-          id="kaomoji"
-          role="button"
-          tabindex="0"
-          aria-label="A little face that follows your cursor. Click to change its mood."
-          class="inline-block cursor-pointer select-none font-supply text-[18vw] font-bold leading-none tracking-tighter text-foreground transition-transform duration-150 ease-out will-change-transform md:text-[9vw]"
-        >
-          [ +_+ ]
+      <div class="mt-12 flex items-end gap-6">
+        <div class="relative">
+          <!-- centerlines (long–short dash), as on a part drawing -->
+          <span class="drw-centerline-h" aria-hidden="true"></span>
+          <span class="drw-centerline-v" aria-hidden="true"></span>
+          <button
+            id="paradox"
+            type="button"
+            aria-label="A little face that follows your cursor. Click to change its mood."
+            class="relative block size-[38vw] cursor-pointer select-none md:size-[15vw]"
+          >
+            <svg viewBox="0 0 24 24" class="size-full overflow-visible" aria-hidden="true">
+              <circle cx="12" cy="12" r="12" fill="var(--accent)"></circle>
+              <g data-eyes style="transition: transform 160ms ease-out;">
+                <ellipse data-eye cx="3.74" cy="13.67" rx="1.87" ry="4.48" transform="rotate(-6 3.74 13.67)" fill="var(--background)"></ellipse>
+                <ellipse data-eye cx="9.74" cy="13.67" rx="1.87" ry="4.48" transform="rotate(-6 9.74 13.67)" fill="var(--background)"></ellipse>
+              </g>
+            </svg>
+          </button>
         </div>
+        <p class="micro mb-1 max-w-[26ch]" aria-hidden="true">
+          fig. 02 — the paradox.<br />follows your cursor. click to change its mood.
+        </p>
       </div>
     </div>
 
-    <!-- RIGHT — accent inset panel -->
+    <!-- RIGHT — a drawing sheet: zone margins, general notes, title block -->
     <div
-      class="relative min-h-[420px] overflow-hidden rounded-tl-xl bg-accent px-6 py-8 text-accent-foreground md:px-10 md:py-10"
+      class="relative min-h-[460px] overflow-hidden rounded-tl-xl bg-accent p-5 text-accent-foreground md:p-6"
     >
-      <!-- corner crop marks -->
-      <span class="pointer-events-none absolute right-4 top-4 h-4 w-4 border-r border-t border-accent-foreground/40"></span>
-      <span class="pointer-events-none absolute bottom-4 left-4 h-4 w-4 border-b border-l border-accent-foreground/40"></span>
-
-      <!-- directory -->
-      <div class="flex flex-col gap-6 font-supply text-sm">
-        <div>
-          <p class="text-xs uppercase tracking-[0.12em] text-accent-foreground/60">[ nav ]</p>
-          <p class="mt-1 uppercase tracking-[0.06em]">
-            {
-              nav.map((label, i) => (
-                <a
-                  href={label === 'index' ? '/' : `/${label}`}
-                  class="transition-opacity duration-200 hover:opacity-60"
-                >
-                  {label}
-                  {i < nav.length - 1 ? ', ' : ''}
-                </a>
-              ))
-            }
-          </p>
-        </div>
-
-        <div>
-          <p class="text-xs uppercase tracking-[0.12em] text-accent-foreground/60">[ socials ]</p>
-          <p class="mt-1 uppercase tracking-[0.06em]">
-            <a href="https://twitter.com/0xdecentparadox" target="_blank" rel="noopener noreferrer" class="transition-opacity duration-200 hover:opacity-60">x/twitter, </a>
-            <a href="https://github.com/decentparadox" target="_blank" rel="noopener noreferrer" class="transition-opacity duration-200 hover:opacity-60">github, </a>
-            <a href="https://t.me/decentparadox" target="_blank" rel="noopener noreferrer" class="transition-opacity duration-200 hover:opacity-60">telegram</a>
-          </p>
-        </div>
-
-        <div>
-          <p class="text-xs uppercase tracking-[0.12em] text-accent-foreground/60">[ webring ]</p>
-          <p class="mt-1 uppercase tracking-[0.06em]">
-            <a href="https://amrita.town" target="_blank" rel="noopener noreferrer" class="transition-opacity duration-200 hover:opacity-60">amrita.town, </a>
-            <a href="https://amrita.town/prev" target="_blank" rel="noopener noreferrer" class="transition-opacity duration-200 hover:opacity-60">prev, </a>
-            <a href="https://amrita.town/random" target="_blank" rel="noopener noreferrer" class="transition-opacity duration-200 hover:opacity-60">random, </a>
-            <a href="https://amrita.town/next" target="_blank" rel="noopener noreferrer" class="transition-opacity duration-200 hover:opacity-60">next</a>
-          </p>
-        </div>
+      <!-- zone references in the sheet margin -->
+      <div class="pointer-events-none absolute inset-x-5 top-0 grid h-5 grid-cols-4 md:inset-x-6 md:h-6" aria-hidden="true">
+        {zonesX.map((z) => <span class="drw-zone">{z}</span>)}
+      </div>
+      <div class="pointer-events-none absolute inset-y-5 left-0 grid w-5 grid-rows-3 md:inset-y-6 md:w-6" aria-hidden="true">
+        {zonesY.map((z) => <span class="drw-zone">{z}</span>)}
       </div>
 
-      <!-- center crosshair -->
-      <span
-        class="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-supply text-2xl text-accent-foreground/40"
-        aria-hidden="true">+</span
-      >
+      <!-- sheet border -->
+      <div class="relative flex h-full min-h-[420px] flex-col justify-between border border-accent-foreground/50">
+        <!-- centering marks at the border midpoints -->
+        <span class="drw-tick left-1/2 top-0 h-2 w-px" aria-hidden="true"></span>
+        <span class="drw-tick bottom-0 left-1/2 h-2 w-px" aria-hidden="true"></span>
+        <span class="drw-tick left-0 top-1/2 h-px w-2" aria-hidden="true"></span>
+        <span class="drw-tick right-0 top-1/2 h-px w-2" aria-hidden="true"></span>
 
-      <!-- bottom-right system mark -->
-      <div class="absolute bottom-6 right-6 flex items-end gap-3">
-        <span class="font-supply text-xs text-accent-foreground/70" aria-hidden="true">+_+&#8482;</span>
-        <span
-          class="hidden h-7 w-24 sm:block"
-          aria-hidden="true"
-          style="background-image: repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 3px, currentColor 3px 5px, transparent 5px 6px, currentColor 6px 9px, transparent 9px 11px, currentColor 11px 12px, transparent 12px 16px);"
-        ></span>
-        <div class="flex flex-col items-end font-supply text-[10px] uppercase tracking-[0.1em] text-accent-foreground/70">
-          <span>decentparadox</span>
-          <span>&copy;2026</span>
+        <!-- general notes -->
+        <div class="p-4 font-supply text-[11px] leading-relaxed text-accent-foreground/80 md:p-5" aria-hidden="true">
+          <p class="mb-1 uppercase tracking-[0.12em] text-accent-foreground/55">notes</p>
+          <ol class="list-none space-y-0.5">
+            <li>1. do not scale drawing.</li>
+            <li>2. all tolerances negotiable over coffee.</li>
+            <li>3. built by hand, mostly. vibecoded, sometimes.</li>
+          </ol>
+        </div>
+
+        <!-- lockups -->
+        <div class="px-4 pb-6 md:px-5">
+          <SheetLockups />
+        </div>
+
+        <!-- title block -->
+        <div class="drw-titleblock grid grid-cols-2 text-[11px] md:grid-cols-4">
+          <div class="col-span-2 md:col-span-2">
+            <span class="drw-field">nav</span>
+            <p>
+              {
+                nav.map((label, i) => (
+                  <><a href={label === 'index' ? '/' : `/${label}`} class="hover:opacity-60">{`${label}${i < nav.length - 1 ? ',' : ''}`}</a>{' '}</>
+                ))
+              }
+            </p>
+          </div>
+          <div>
+            <span class="drw-field">elsewhere</span>
+            <p class="flex flex-col">
+              {elsewhere.map((l) => <a href={l.href} target="_blank" rel="noopener noreferrer" class="hover:opacity-60">{l.label}</a>)}
+            </p>
+          </div>
+          <div>
+            <span class="drw-field">webring</span>
+            <p class="flex flex-col">
+              {webring.map((l) => <a href={l.href} target="_blank" rel="noopener noreferrer" class="hover:opacity-60">{l.label}</a>)}
+            </p>
+          </div>
+          <div class="col-span-2 md:col-span-2">
+            <span class="drw-field">title</span>
+            <p class="text-base leading-tight">contact sheet</p>
+          </div>
+          <div>
+            <span class="drw-field">drawn</span>
+            <p>sasank reddy</p>
+          </div>
+          <div class="grid grid-cols-2">
+            <div class="!border-0 !p-0">
+              <span class="drw-field">rev</span>
+              <p class="whitespace-nowrap tabular-nums">{rev}</p>
+            </div>
+            <div class="!border-0 !p-0 text-right">
+              <span class="drw-field">sheet</span>
+              <p>1 / 1</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -116,11 +154,10 @@ const nav = ['index', 'blog', 'projects', 'about', 'guestbook']
   // Click-to-copy email
   document.querySelectorAll('[data-email-cta]').forEach((link) => {
     link.addEventListener('click', (e) => {
-      if (!navigator.clipboard) return
       e.preventDefault()
       navigator.clipboard.writeText(email).then(() => {
         const original = link.textContent
-        link.textContent = 'copied [ ^ - ^ / ]'
+        link.textContent = 'copied to clipboard.'
         setTimeout(() => {
           link.textContent = original
         }, 1500)
@@ -128,51 +165,83 @@ const nav = ['index', 'blog', 'projects', 'about', 'guestbook']
     })
   })
 
-  // Interactive kaomoji: follows the cursor, changes mood on hover / click
-  const k = document.getElementById('kaomoji')
-  const panel = document.querySelector('[data-left-panel]')
-  if (k && panel) {
-    const faces = [
-      '[ +_+ ]',
-      '[ o_o ]',
-      '[ ^_^ ]',
-      '[ -_- ]',
-      '[ >_< ]',
-      '[ @_@ ]',
-      '[ ಠ_ಠ ]',
-      '[ ^‿^ ]',
-    ]
-    let idx = 0
-    let resting = faces[0]
-
-    const cycle = () => {
-      idx = (idx + 1) % faces.length
-      resting = faces[idx]
-      k.textContent = resting
-    }
-    k.addEventListener('click', cycle)
-    k.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault()
-        cycle()
+  // Sheet lockups: reveal once in view; mono text scrambles on hover
+  const sheet = document.querySelector('.lk-sheet')
+  if (sheet) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) {
+          sheet.classList.add('is-in')
+          io.disconnect()
+        }
+      })
+    }, { threshold: 0.25 })
+    io.observe(sheet)
+  }
+  const glyphs = '01<>/_\\[]{}—=+*#'
+  document.querySelectorAll('[data-scramble]').forEach((el) => {
+    const final = el.textContent
+    let raf = 0
+    el.addEventListener('mouseenter', () => {
+      cancelAnimationFrame(raf)
+      const start = performance.now()
+      const run = (t) => {
+        const p = Math.min(1, (t - start) / 420)
+        const settled = Math.floor(p * final.length)
+        el.textContent = [...final]
+          .map((c, i) => (i < settled || c === ' ' ? c : glyphs[(Math.random() * glyphs.length) | 0]))
+          .join('')
+        if (p < 1) raf = requestAnimationFrame(run)
+        else el.textContent = final
       }
+      raf = requestAnimationFrame(run)
     })
-    k.addEventListener('mouseenter', () => {
-      k.textContent = '[ ^_^ ]'
-    })
-    k.addEventListener('mouseleave', () => {
-      k.textContent = resting
+  })
+
+  // The paradox: eyes follow the cursor, blink now and then, click = new mood
+  const face = document.getElementById('paradox')
+  const panel = document.querySelector('[data-left-panel]')
+  if (face && panel) {
+    const eyesG = face.querySelector('[data-eyes]')
+    const eyes = face.querySelectorAll('[data-eye]')
+    // mood = eye shape (rx, ry)
+    const moods = [
+      [1.87, 4.48], // resting
+      [2.4, 5.4], // surprised
+      [2.1, 1.3], // unimpressed
+      [1.2, 3.4], // focused
+    ]
+    let mood = 0
+    const setEyes = ([rx, ry]) =>
+      eyes.forEach((e) => {
+        e.setAttribute('rx', rx)
+        e.setAttribute('ry', ry)
+      })
+
+    face.addEventListener('click', () => {
+      mood = (mood + 1) % moods.length
+      setEyes(moods[mood])
     })
 
-    // Parallax: face leans toward the cursor across the panel
-    panel.addEventListener('mousemove', (e) => {
-      const r = panel.getBoundingClientRect()
-      const dx = ((e.clientX - r.left) / r.width - 0.5) * 18
-      const dy = ((e.clientY - r.top) / r.height - 0.5) * 12
-      k.style.transform = `translate(${dx}px, ${dy}px)`
-    })
-    panel.addEventListener('mouseleave', () => {
-      k.style.transform = 'translate(0, 0)'
-    })
+    // blink
+    const blink = () => {
+      const [rx] = moods[mood]
+      setEyes([rx, 0.35])
+      setTimeout(() => setEyes(moods[mood]), 120)
+      setTimeout(blink, 2500 + Math.random() * 4000)
+    }
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) setTimeout(blink, 3000)
+
+    // look toward the cursor (resting gaze is down-left, like the logo)
+    if (window.__paradoxLook) window.removeEventListener('mousemove', window.__paradoxLook)
+    window.__paradoxLook = (e) => {
+      const r = face.getBoundingClientRect()
+      const nx = (e.clientX - (r.left + r.width / 2)) / window.innerWidth
+      const ny = (e.clientY - (r.top + r.height / 2)) / window.innerHeight
+      const dx = Math.max(-2, Math.min(9, nx * 18 + 2.5))
+      const dy = Math.max(-7, Math.min(3, ny * 14))
+      eyesG.style.transform = `translate(${dx}px, ${dy}px)`
+    }
+    window.addEventListener('mousemove', window.__paradoxLook)
   }
 </script>

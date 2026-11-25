@@ -13,8 +13,9 @@ export type Link = {
 }
 
 export const SITE: Site = {
-  TITLE: 'DecentParadox | Sasank Reddy | Portfolio',
-  DESCRIPTION: 'Freelance web development and cybersecurity shenanigans',
+  TITLE: 'Sasank Reddy',
+  DESCRIPTION:
+    'Sasank Reddy is a design engineer who designs and builds software: Neumann, Panopticon, Tethra and other small tools.',
   EMAIL: 'hello@decentparadox.me',
   NUM_POSTS_ON_HOMEPAGE: 2,
   POSTS_PER_PAGE: 3,
@@ -23,14 +24,13 @@ export const SITE: Site = {
 
 export const NAV_LINKS: Link[] = [
   { href: '/blog', label: 'blog' },
-  { href: '/projects', label: 'projects' },
-  { href: '/about', label: 'about' },
+  { href: '/microblog', label: 'microblog' },
   { href: '/guestbook', label: 'guestbook' },
 ]
 
 export const SOCIAL_LINKS: Link[] = [
-  { href: 'https://github.com/decentparadox', label: 'GitHub' },
-  { href: 'https://twitter.com/0xdecentparadox', label: 'Twitter' },
+  { href: 'https://github.com/crazyparadox', label: 'GitHub' },
+  { href: 'https://twitter.com/decentparadox', label: 'Twitter' },
   { href: 'hello@decentparadox.me', label: 'Email' },
   { href: '/rss.xml', label: 'RSS' },
 ]

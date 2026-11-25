@@ -16,9 +16,10 @@ import Link from './Link.astro'
 
 interface Props {
   entry: CollectionEntry<'blog'>
+  index?: number
 }
 
-const { entry } = Astro.props
+const { entry, index } = Astro.props
 const formattedDate = formatDate(entry.data.date)
 const readTime = await getCombinedReadingTime(entry.id)
 const authors = await parseAuthors(entry.data.authors ?? [])
@@ -88,6 +89,12 @@ const subpostCount = !isSubpost(entry.id) ? await getSubpostCount(entry.id) : 0
             </>
           )
         }
+        {index !== undefined && (
+          <>
+            <span class="micro" aria-hidden="true">log_{String(index + 1).padStart(3, '0')}</span>
+            <Separator orientation="vertical" className="h-4" />
+          </>
+        )}
         <span class="text-accent">{formattedDate}</span>
         <Separator orientation="vertical" className="h-4" />
         <span class="text-accent">{readTime}</span>

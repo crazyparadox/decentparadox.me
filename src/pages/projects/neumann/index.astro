@@ -1,0 +1,121 @@
+---
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import Container from '@/components/Container.astro'
+import Layout from '@/layouts/Layout.astro'
+---
+
+<Layout>
+  <Container class="flex grow flex-col gap-y-6">
+    <Breadcrumbs
+      items={[
+        { label: 'Projects', icon: 'lucide:archive' },
+        {
+          label: 'Neumann',
+          href: '/projects/neumann',
+          icon: 'lucide:sticky-note',
+        },
+      ]}
+    />
+
+    <div class="flex flex-col rounded-none pt-10 font-sans" role="main">
+      <div class="flex flex-wrap justify-between gap-5 max-md:max-w-full">
+        <div class="flex flex-col max-md:max-w-full">
+          <h1 class="self-start font-serifItalic text-5xl leading-none tracking-tighter text-accent max-md:text-4xl">
+            Neumann
+          </h1>
+          <div class="mt-5 max-w-[40rem] text-lg font-medium leading-tight tracking-tighter text-foreground">
+            The code editor where agents work across your codebase. They run on
+            your machine, and you approve every change before it ships.
+          </div>
+        </div>
+        <div class="flex w-full items-center justify-between gap-2 self-start text-right text-sm leading-loose tracking-tighter text-accent md:w-auto md:flex-col">
+          <div>Product</div>
+          <div class="self-end">Live</div>
+        </div>
+      </div>
+
+      <img
+        loading="lazy"
+        src="/static/images/shots/neumann-home.png"
+        alt="Neumann homepage"
+        class="mt-8 w-full rounded-xl object-cover ring-1 ring-foreground/10"
+      />
+
+      <div class="mt-11 flex w-full items-start justify-between gap-10 max-md:mt-10 max-md:max-w-full max-md:flex-wrap">
+        <div class="my-auto flex w-[925px] min-w-[240px] flex-col self-stretch pt-2 text-sm leading-loose tracking-tighter text-foreground max-md:max-w-full">
+          <div class="mr-20 text-2xl leading-8 tracking-tighter text-foreground max-md:mr-2.5 max-md:max-w-full">
+            Point an agent at the whole project, watch the run, and approve the
+            diff. The codebase stays where it already is.
+          </div>
+          <div class="mr-16 mt-7 leading-5 max-md:mr-2.5 max-md:max-w-full">
+            Neumann is a desktop editor for that loop. An agent can work across
+            the repository, and every edit shows up as a diff in the editor.
+            Nothing lands until you say it does. The same workspace also runs
+            in the browser. A phone client is listed on the site as coming soon.
+          </div>
+          <ul class="mt-6 list-none space-y-3 pl-4 max-md:max-w-full">
+            <li class="flex gap-2">
+              <div class="w-1 shrink-0 bg-accent"></div>
+              Local-first. The codebase stays on the machine. Indexing uploads
+              only what it must, then deletes it.
+            </li>
+            <li class="flex gap-2">
+              <div class="w-1 shrink-0 bg-accent"></div>
+              Git-native review. Diffs, hunks, and staging live in the editor.
+            </li>
+            <li class="flex gap-2">
+              <div class="w-1 shrink-0 bg-accent"></div>
+              Any agent that speaks the Agent Client Protocol, including Claude
+              Code, Gemini CLI, and OpenCode. No single-model lock-in.
+            </li>
+            <li class="flex gap-2">
+              <div class="w-1 shrink-0 bg-accent"></div>
+              Native builds for macOS, Windows, and Linux, plus the same
+              workspace on the web. Privacy Mode keeps plaintext out of requests.
+            </li>
+          </ul>
+        </div>
+        <div class="my-auto flex w-[408px] min-w-[240px] flex-col items-start self-stretch py-0.5 pr-14 text-sm font-semibold leading-5 tracking-tighter text-foreground">
+          <h2 class="leading-none">Contribution</h2>
+          <div class="mt-3 text-sm font-normal tracking-tighter text-foreground">
+            Product
+          </div>
+          <h2 class="mt-10 leading-none">Stack</h2>
+          <div class="mt-3 text-sm font-normal tracking-tighter text-foreground">
+            Native desktop<br />
+            Web
+          </div>
+          <h2 class="mt-10 leading-none">Platform</h2>
+          <div class="mt-3 text-sm font-normal tracking-tighter text-foreground">
+            macOS, Windows, Linux<br />
+            Browser
+          </div>
+          <h2 class="mt-10 leading-none">Site</h2>
+          <a
+            href="https://useneumann.com"
+            class="mt-2.5 text-base font-normal leading-none tracking-tighter text-accent hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            useneumann.com
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-5 pb-12 md:grid-cols-2">
+      <img
+        loading="lazy"
+        src="/static/images/shots/neumann-docs.png"
+        alt="Neumann documentation"
+        class="w-full rounded-xl object-cover ring-1 ring-foreground/10"
+      />
+      <img
+        loading="lazy"
+        src="/static/images/shots/neumann-pricing.png"
+        alt="Neumann pricing"
+        class="w-full rounded-xl object-cover ring-1 ring-foreground/10"
+      />
+    </div>
+  </Container>
+</Layout>

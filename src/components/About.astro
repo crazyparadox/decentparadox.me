@@ -2,6 +2,7 @@
 import Currently from '@/components/Currently'
 import CodingStats from '@/components/CodingStats'
 import Letterboxd from '@/components/Letterboxd'
+import MediaTag from '@/components/micro/MediaTag.astro'
 ---
 
 <section class="w-full my-0 mt-16 flex flex-col gap-2 space-y-8 font-sans">
@@ -23,13 +24,14 @@ import Letterboxd from '@/components/Letterboxd'
       <div class="flex flex-col gap-8">
         <Currently client:load />
       </div>
+      <MediaTag class="mt-auto hidden md:flex" />
     </div>
   </div>
   <div class="flex flex-col gap-4">
     <div class="flex items-center justify-between font-sans opacity-75">
       <h2 class="font-serif text-accent">(Methodology)</h2>
     </div>
-    <div class="flex flex-col md:flex-row gap-8">
+    <div class="grid grid-cols-1 gap-8 md:grid-cols-4">
       <div class="flex flex-col gap-4">
         <h1 class="font-serifItalic text-accent">Research</h1>
         <p>

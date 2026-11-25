@@ -15,7 +15,7 @@ About Sasank:
 - Interests: reverse engineering, game hacking, web development, blockchain, app development, machine learning, and networking.
 - Spends weekends on Capture The Flag (CTF) security challenges.
 - A versatile problem solver who values being well-prepared. Outside tech, he reads books and manga for creative inspiration.
-- Contact: hello@decentparadox.me · GitHub: github.com/decentparadox · Twitter/X: @0xdecentparadox
+- Contact: hello@decentparadox.me · GitHub: github.com/crazyparadox · Twitter/X: @decentparadox
 
 Selected projects:
 - Tethra — a cross-platform desktop AI chat app built with Tauri and React 19 (TypeScript). Conversations stay local in SQLite, but any chat can be shared as a read-only public web link. Integrates OpenAI, Anthropic, Google, and DeepSeek via the Vercel AI SDK. Role: product, full-stack, UI/UX, Rust/Tauri backend.

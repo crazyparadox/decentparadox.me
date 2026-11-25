@@ -1,0 +1,22 @@
+---
+// The top of every inner page: a doodle eyebrow with an optional count, then one serif line.
+// An optional `art` slot holds a picture on the right (the mascot scenes).
+// Put the line in the default slot; wrap one word in <em data-scribble="underline"> if you want it marked.
+import Doodle from '@/components/sheet/Doodle.astro'
+interface Props {
+  label: string
+  count?: number
+}
+const { label, count } = Astro.props
+const pad = (n: number) => String(n).padStart(2, '0')
+---
+
+<header class:list={['dp-intro', Astro.slots.has('art') && 'dp-intro--art']}>
+  <div class="dp-intro__text">
+  <p class="dp-micro dp-eyebrow dp-eyebrow--doodle">
+    <Doodle name="star" /><b>{label}</b>{count !== undefined && <i>({pad(count)})</i>}
+  </p>
+  <h1 class="dp-statement dp-statement--md"><slot /></h1>
+  </div>
+  {Astro.slots.has('art') && <div class="dp-intro__art"><slot name="art" /></div>}
+</header>

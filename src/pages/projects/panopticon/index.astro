@@ -1,0 +1,129 @@
+---
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import Container from '@/components/Container.astro'
+import Layout from '@/layouts/Layout.astro'
+---
+
+<Layout>
+  <Container class="flex grow flex-col gap-y-6">
+    <Breadcrumbs
+      items={[
+        { label: 'Projects', icon: 'lucide:archive' },
+        {
+          label: 'Panopticon',
+          href: '/projects/panopticon',
+          icon: 'lucide:sticky-note',
+        },
+      ]}
+    />
+
+    <div class="flex flex-col rounded-none pt-10 font-sans" role="main">
+      <div class="flex flex-wrap justify-between gap-5 max-md:max-w-full">
+        <div class="flex flex-col max-md:max-w-full">
+          <h1 class="self-start font-serifItalic text-5xl leading-none tracking-tighter text-accent max-md:text-4xl">
+            Panopticon
+          </h1>
+          <div class="mt-5 max-w-[40rem] text-lg font-medium leading-tight tracking-tighter text-foreground">
+            A memory of your screen, for your agents. The Mac app records the
+            day. The screenshots stay on the machine.
+          </div>
+        </div>
+        <div class="flex w-full items-center justify-between gap-2 self-start text-right text-sm leading-loose tracking-tighter text-accent md:w-auto md:flex-col">
+          <div>Product</div>
+          <div class="self-end">Live</div>
+        </div>
+      </div>
+
+      <img
+        loading="lazy"
+        src="/static/images/shots/panopticon-home.png"
+        alt="Panopticon homepage"
+        class="mt-8 w-full rounded-xl object-cover ring-1 ring-foreground/10"
+      />
+
+      <div class="mt-11 flex w-full items-start justify-between gap-10 max-md:mt-10 max-md:max-w-full max-md:flex-wrap">
+        <div class="my-auto flex w-[925px] min-w-[240px] flex-col self-stretch pt-2 text-sm leading-loose tracking-tighter text-foreground max-md:max-w-full">
+          <div class="mr-20 text-2xl leading-8 tracking-tighter text-foreground max-md:mr-2.5 max-md:max-w-full">
+            Record the screen, turn the day into a timeline and a recap, and
+            let agents read the text over MCP.
+          </div>
+          <div class="mr-16 mt-7 leading-5 max-md:mr-2.5 max-md:max-w-full">
+            The app captures with ScreenCaptureKit and skips idle stretches and
+            apps you have blocked. Pause sits in the menu bar. An LLM you choose
+            — Gemini, Claude Code, Codex, or a local model — batches the captures
+            into timeline cards and writes a daily recap. What syncs to a
+            Postgres you host yourself is that text, not the images. Screenshots
+            leave the machine only as input to the model you configured, or not
+            at all if that model is local.
+          </div>
+          <ul class="mt-6 list-none space-y-3 pl-4 max-md:max-w-full">
+            <li class="flex gap-2">
+              <div class="w-1 shrink-0 bg-accent"></div>
+              <span><span class="font-supply">get_timeline</span> reads one day, card by card.</span>
+            </li>
+            <li class="flex gap-2">
+              <div class="w-1 shrink-0 bg-accent"></div>
+              <span><span class="font-supply">search_timeline</span> finds when something last showed up on screen.</span>
+            </li>
+            <li class="flex gap-2">
+              <div class="w-1 shrink-0 bg-accent"></div>
+              <span><span class="font-supply">get_recap</span> returns the generated standup: highlights, tasks, blockers.</span>
+            </li>
+            <li class="flex gap-2">
+              <div class="w-1 shrink-0 bg-accent"></div>
+              <span><span class="font-supply">category_breakdown</span> and <span class="font-supply">list_days</span> show where the hours went, and how fresh the sync is.</span>
+            </li>
+          </ul>
+        </div>
+        <div class="my-auto flex w-[408px] min-w-[240px] flex-col items-start self-stretch py-0.5 pr-14 text-sm font-semibold leading-5 tracking-tighter text-foreground">
+          <h2 class="leading-none">Contribution</h2>
+          <div class="mt-3 text-sm font-normal tracking-tighter text-foreground">
+            Product
+          </div>
+          <h2 class="mt-10 leading-none">Stack</h2>
+          <div class="mt-3 text-sm font-normal tracking-tighter text-foreground">
+            ScreenCaptureKit, SQLite<br />
+            MCP, Postgres
+          </div>
+          <h2 class="mt-10 leading-none">Platform</h2>
+          <div class="mt-3 text-sm font-normal tracking-tighter text-foreground">
+            macOS
+          </div>
+          <h2 class="mt-10 leading-none">Site</h2>
+          <a
+            href="https://panopticon.decentparadox.me"
+            class="mt-2.5 text-base font-normal leading-none tracking-tighter text-accent hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            panopticon.decentparadox.me
+          </a>
+          <h2 class="mt-10 leading-none">Repository</h2>
+          <a
+            href="https://github.com/crazyparadox/panopticon"
+            class="mt-2.5 text-base font-normal leading-none tracking-tighter text-accent hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            github.com/crazyparadox/panopticon
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-5 pb-12 md:grid-cols-2">
+      <img
+        loading="lazy"
+        src="/static/images/shots/panopticon-how.png"
+        alt="How Panopticon records, distills, and serves a day"
+        class="w-full rounded-xl object-cover ring-1 ring-foreground/10"
+      />
+      <img
+        loading="lazy"
+        src="/static/images/shots/panopticon-changelog.png"
+        alt="Panopticon changelog"
+        class="w-full rounded-xl object-cover ring-1 ring-foreground/10"
+      />
+    </div>
+  </Container>
+</Layout>

@@ -1,5 +1,5 @@
 ---
-import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import PageIntro from '@/components/sheet/PageIntro.astro'
 import Link from '@/components/Link.astro'
 import PageHead from '@/components/PageHead.astro'
 import { badgeVariants } from '@/components/ui/badge'
@@ -10,9 +10,9 @@ import { Icon } from 'astro-icon/components'
 const sortedTags = await getSortedTags()
 ---
 
-<Layout class="">
+<Layout plain>
   <PageHead slot="head" title="Tags" />
-  <Breadcrumbs items={[{ label: 'Tags', icon: 'lucide:tags' }]} />
+  <PageIntro label="tags" count={sortedTags.length}>everything, sorted by tag.</PageIntro>
 
   <div class="flex flex-col gap-4">
     <div class="flex flex-wrap gap-2">

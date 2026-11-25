@@ -1,0 +1,77 @@
+---
+// The last song played and the last film logged, as two small cards: cover, title, one line under it.
+// Fetched in the browser from the same two public feeds the old site used (Last.fm via a small proxy,
+// Letterboxd's RSS via rss2json), so they are current without a rebuild. Each card is a grey skeleton until its feed
+// answers; a card whose feed fails removes itself. With no script, nothing shows.
+---
+
+<div class="dp-recent" data-recent hidden>
+  <a class="dp-recent__card is-loading" data-recent-song target="_blank" rel="noopener noreferrer">
+    <img class="dp-recent__art" alt="" width="72" height="72" />
+    <span class="dp-recent__text">
+      <span class="dp-micro dp-micro--faint" data-kind>last played</span>
+      <span class="dp-recent__title" data-title></span>
+      <span class="dp-recent__sub" data-sub></span>
+    </span>
+  </a>
+  <a class="dp-recent__card is-loading" data-recent-film target="_blank" rel="noopener noreferrer">
+    <img class="dp-recent__art dp-recent__art--poster" alt="" width="48" height="72" />
+    <span class="dp-recent__text">
+      <span class="dp-micro dp-micro--faint">last watched</span>
+      <span class="dp-recent__title" data-title></span>
+      <span class="dp-recent__sub" data-sub></span>
+    </span>
+  </a>
+</div>
+
+<script is:inline data-astro-rerun>
+  ;(() => {
+    const wrap = document.querySelector('[data-recent]')
+    if (!wrap) return
+    wrap.hidden = false // the skeletons show at once
+    const drop = (card) => {
+      card.hidden = true
+      if ([...wrap.children].every((c) => c.hidden)) wrap.hidden = true
+    }
+    const song = wrap.querySelector('[data-recent-song]')
+    const film = wrap.querySelector('[data-recent-film]')
+    const fill = (card, { title, sub, art, href, kind }) => {
+      card.querySelector('[data-title]').textContent = title
+      card.querySelector('[data-sub]').textContent = sub
+      if (kind) card.querySelector('[data-kind]').textContent = kind
+      const img = card.querySelector('img')
+      if (art) { img.src = art; img.alt = title } else img.remove()
+      card.href = href
+      card.classList.remove('is-loading')
+    }
+    fetch('https://lastfm-last-played.biancarosa.com.br/decentparadox/latest-song')
+      .then((r) => r.json())
+      .then(({ track }) => {
+        if (!track) return drop(song)
+        const art = (track.image || []).map((i) => i['#text']).filter(Boolean).pop()
+        fill(song, {
+          title: track.name,
+          sub: track.artist && track.artist['#text'],
+          art,
+          href: track.url,
+          kind: track['@attr'] && track['@attr'].nowplaying === 'true' ? 'listening now' : 'last played',
+        })
+      })
+      .catch(() => drop(song))
+    fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fletterboxd.com%2Fdecentparadox%2Frss')
+      .then((r) => r.json())
+      .then((data) => {
+        const item = data && data.status === 'ok' && data.items && data.items[0]
+        if (!item) return drop(film)
+        const m = item.title.match(/^(.+?), (\d{4})(?: - (.+))?$/)
+        fill(film, {
+          title: m ? m[1] : item.title,
+          sub: m ? [m[2], m[3]].filter(Boolean).join(' · ') : '',
+          // the feed's thumbnail field is often empty; the poster is always in the entry's HTML
+          art: item.thumbnail || ((item.description || item.content || '').match(/<img[^>]+src="([^"]+)"/) || [])[1] || '',
+          href: item.link,
+        })
+      })
+      .catch(() => drop(film))
+  })()
+</script>

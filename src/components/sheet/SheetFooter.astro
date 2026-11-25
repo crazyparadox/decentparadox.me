@@ -1,0 +1,77 @@
+---
+// The foot of every page: the "start a project" call, the logo, and the accent sheet of links.
+import Doodle from '@/components/sheet/Doodle.astro'
+import { NAV_LINKS, SITE } from '@/consts'
+
+const email = SITE.EMAIL
+const year = new Date().getFullYear()
+const pages = [{ href: '/', label: 'index' }, ...NAV_LINKS]
+const elsewhere = [
+  { label: 'x/twitter', href: 'https://twitter.com/decentparadox' },
+  { label: 'github', href: 'https://github.com/crazyparadox' },
+  { label: 'telegram', href: 'https://t.me/decentparadox' },
+]
+const webring = [
+  { label: 'amrita.town', href: 'https://amrita.town' },
+  { label: 'prev', href: 'https://amrita.town/prev' },
+  { label: 'random', href: 'https://amrita.town/random' },
+  { label: 'next', href: 'https://amrita.town/next' },
+]
+---
+
+<div class="dp-sheet">
+  <footer class="foot">
+    <div class="dp-call">
+      <p class="dp-mega">
+        start a project
+        <span class="call__note" aria-hidden="true"><Doodle name="arrow" size={72} /><span class="dp-hand">say hi</span></span>
+      </p>
+      <a class="dp-mega" href={`mailto:${email}`} data-email-cta>{email}</a>
+    </div>
+  </footer>
+</div>
+
+<div class="dp-grid foot__bottom">
+  <div class="foot__fig">
+    {/* he posts the letter the line above asks for */}
+    <img class="foot__scene" src="/static/images/character/scene-footer-cut.webp" alt="The mascot on tiptoe, pushing an envelope into the slot of an old red postbox" width="698" height="1067" loading="lazy" />
+  </div>
+
+  <div class="foot__sheet">
+    <div class="dp-accent-sheet">
+      <div class="foot__cols">
+        <div>
+          <p class="dp-micro">nav</p>
+          {pages.map((l) => <a href={l.href}>{l.label}</a>)}
+        </div>
+        <div>
+          <p class="dp-micro">elsewhere</p>
+          {elsewhere.map((l) => <a href={l.href} target="_blank" rel="noopener noreferrer">{l.label}</a>)}
+        </div>
+        <div>
+          <p class="dp-micro">webring</p>
+          {webring.map((l) => <a href={l.href} target="_blank" rel="noopener noreferrer">{l.label}</a>)}
+        </div>
+      </div>
+      <div class="foot__base">
+        <p class="dp-hand">thanks for scrolling.</p>
+        <p class="dp-micro">© {year} sasank reddy</p>
+        <a class="dp-link dp-link--up" href="#top">back to top</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline define:vars={{ email }} data-astro-rerun>
+  // click the address to copy it
+  document.querySelectorAll('[data-email-cta]').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      if (!navigator.clipboard) return
+      e.preventDefault()
+      navigator.clipboard.writeText(email).then(() => {
+        link.textContent = 'copied to clipboard.'
+        setTimeout(() => (link.textContent = email), 1500)
+      })
+    })
+  })
+</script>

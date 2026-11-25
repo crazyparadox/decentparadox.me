@@ -1,0 +1,38 @@
+---
+// Hand-drawn doodles, as single-stroke paths in currentColor. Scribbles.astro draws them in.
+interface Props {
+  name: 'arrow' | 'arrow-r' | 'star' | 'squiggle' | 'zigzag' | 'loop'
+  size?: number // width in px
+  flip?: boolean
+  class?: string
+}
+const { name, size, flip = false, class: className } = Astro.props
+const set = {
+  // a hooked arrow: starts top-right, lands bottom-left
+  arrow: { box: '0 0 80 52', w: 64, d: ['M72 5 C 66 28, 44 41, 11 39', 'M24 29 L10 39 L26 47'] },
+  // a short arrow pointing right, for links
+  'arrow-r': { box: '0 0 52 26', w: 30, d: ['M4 14 C 17 10, 31 12, 45 13', 'M35 5 L47 13 L36 22'] },
+  star: { box: '0 0 40 40', w: 14, d: ['M20 4 L21 36', 'M6 12 L34 29', 'M33 10 L7 30'] },
+  squiggle: { box: '0 0 70 24', w: 56, d: ['M3 13 C 9 2, 13 23, 19 12 S 29 2, 35 12 S 45 23, 51 12 S 61 3, 67 12'] },
+  zigzag: { box: '0 0 84 40', w: 120, d: ['M4 30 L19 7 L22 33 L39 6 L42 33 L59 7 L62 32 L80 9'] },
+  loop: { box: '0 0 60 40', w: 44, d: ['M4 30 C 18 34, 34 28, 34 16 C 34 6, 20 6, 21 17 C 22 30, 42 34, 56 22'] },
+}[name]
+const w = size ?? set.w
+const [, , bw, bh] = set.box.split(' ').map(Number)
+---
+
+<svg
+  class:list={['dp-doodle', className]}
+  width={w}
+  height={Math.round((w * bh) / bw)}
+  viewBox={set.box}
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2.4"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  style={flip ? 'transform: scaleX(-1)' : undefined}
+  aria-hidden="true"
+>
+  {set.d.map((d) => <path d={d} vector-effect="non-scaling-stroke" />)}
+</svg>

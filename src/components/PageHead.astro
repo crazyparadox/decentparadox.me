@@ -1,4 +1,6 @@
 ---
+// Title, description, canonical and social tags for a page.
+// `title` is the page's own name; the home page passes none and gets the site title alone.
 import { SITE } from '@/consts'
 
 interface Props {
@@ -7,30 +9,51 @@ interface Props {
   noindex?: boolean
 }
 
-const {
-  title = SITE.TITLE,
-  description = SITE.DESCRIPTION,
-  noindex = false,
-} = Astro.props
-const image = new URL('/static/1200x630.png', Astro.site)
+const { title, description = SITE.DESCRIPTION, noindex = false } = Astro.props
+const full = title ? `${title} | ${SITE.TITLE}` : `${SITE.TITLE}, design engineer`
+const canonical = new URL(Astro.url.pathname, Astro.site)
+const image = new URL('/static/og.png', Astro.site)
+const video = new URL('/static/og.mp4', Astro.site)
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Sasank Reddy',
+  alternateName: 'decentparadox',
+  url: SITE.SITEURL,
+  jobTitle: 'Design Engineer',
+  worksFor: { '@type': 'Organization', name: 'Flam', url: 'https://flamapp.ai' },
+  sameAs: ['https://github.com/crazyparadox', 'https://twitter.com/decentparadox'],
+}
 ---
 
-<title>{`${title} | ${SITE.TITLE}`}</title>
+<title>{full}</title>
 <meta name="description" content={description} />
-<link rel="canonical" href={SITE.SITEURL} />
+<meta name="author" content="Sasank Reddy" />
+<link rel="canonical" href={canonical} />
 {noindex && <meta name="robots" content="noindex, nofollow" />}
 
-<meta property="og:title" content={title} />
+<meta property="og:title" content={title ?? SITE.TITLE} />
 <meta property="og:description" content={description} />
 <meta property="og:image" content={image} />
-<meta property="og:image:alt" content={title} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Sasank Reddy, handwritten, with a cartoon bat asleep on a beanbag" />
+<meta property="og:video" content={video} />
+<meta property="og:video:secure_url" content={video} />
+<meta property="og:video:type" content="video/mp4" />
+<meta property="og:video:width" content="1200" />
+<meta property="og:video:height" content="630" />
 <meta property="og:type" content="website" />
 <meta property="og:locale" content="en_US" />
 <meta property="og:site_name" content={SITE.TITLE} />
-<meta property="og:url" content={Astro.url} />
+<meta property="og:url" content={canonical} />
 
-<meta name="twitter:title" content={title} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@decentparadox" />
+<meta name="twitter:creator" content="@decentparadox" />
+<meta name="twitter:title" content={title ?? SITE.TITLE} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={image} />
-<meta name="twitter:image:alt" content={title} />
-<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image:alt" content="Sasank Reddy, handwritten, with a cartoon bat asleep on a beanbag" />
+
+{!title && <script type="application/ld+json" set:html={JSON.stringify(person)} />}

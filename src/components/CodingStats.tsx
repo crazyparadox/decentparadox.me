@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { WakatimeStats, WakatimeLanguage } from '@/types';
+import { DotMeter } from '@/components/micro/Glyphs';
 
 const CodingStats = () => {
   const [languages, setLanguages] = useState<WakatimeLanguage[]>([]);
@@ -84,8 +85,8 @@ const CodingStats = () => {
               <span className="font-medium">{lang.name}</span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex-1 h-px bg-foreground opacity-60" > </div>
-              <span className="text-sm opacity-75">{lang.percent.toFixed(1)}%</span>
+              <DotMeter value={lang.percent / 100} cells={20} className="hidden text-accent sm:inline-flex" />
+              <span className="w-12 text-right text-sm tabular-nums opacity-75">{lang.percent.toFixed(1)}%</span>
             </div>
           </div>
         ))}

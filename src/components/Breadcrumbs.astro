@@ -1,14 +1,6 @@
 ---
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
-import { Icon } from 'astro-icon/components'
-
+// A plain mono trail: index / section / page. No icons (the `icon` field is accepted and ignored,
+// so existing callers keep working).
 export interface BreadcrumbItem {
   href?: string
   label: string
@@ -22,40 +14,18 @@ interface Props {
 const { items } = Astro.props
 ---
 
-<Breadcrumb>
-  <BreadcrumbList>
-    <BreadcrumbItem>
-      <BreadcrumbLink href="/">
-        <Icon name="lucide:home" class="size-4 shrink-0" />
-      </BreadcrumbLink>
-    </BreadcrumbItem>
-    {
-      items.map((item, index) => (
-        <>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            {index === items.length - 1 ? (
-              <BreadcrumbPage>
-                <span class="flex items-center gap-x-2">
-                  {item.icon && (
-                    <Icon name={item.icon} class="size-4 shrink-0" />
-                  )}
-                  <span>{item.label}</span>
-                </span>
-              </BreadcrumbPage>
-            ) : (
-              <BreadcrumbLink href={item.href}>
-                <span class="flex items-center gap-x-2">
-                  {item.icon && (
-                    <Icon name={item.icon} class="size-4 shrink-0" />
-                  )}
-                  <span>{item.label}</span>
-                </span>
-              </BreadcrumbLink>
-            )}
-          </BreadcrumbItem>
-        </>
-      ))
-    }
-  </BreadcrumbList>
-</Breadcrumb>
+<nav class="dp-crumbs dp-micro" aria-label="Breadcrumb">
+  <a href="/">index</a>
+  {
+    items.map((item, index) => (
+      <>
+        <span aria-hidden="true">/</span>
+        {index === items.length - 1 || !item.href ? (
+          <span aria-current={index === items.length - 1 ? 'page' : undefined}>{item.label}</span>
+        ) : (
+          <a href={item.href}>{item.label}</a>
+        )}
+      </>
+    ))
+  }
+</nav>

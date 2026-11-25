@@ -1,36 +1,48 @@
 ---
-import Footer from '@/components/Footer.astro'
 import Head from '@/components/Head.astro'
-import Header from '@/components/Header.astro'
+import PageHead from '@/components/PageHead.astro'
+import Scribbles from '@/components/sheet/Scribbles.astro'
+import SheetFooter from '@/components/sheet/SheetFooter.astro'
+import SheetNav from '@/components/sheet/SheetNav.astro'
 import { SITE } from '@/consts'
 import '@/styles/global.css'
+import '@/styles/sheet.css'
 type Props = {
   title: string
   description: string
   image?: string
+  plain?: boolean
 }
 
-const { title, description, image } = Astro.props
+const { title, description, image, plain = false } = Astro.props
 ---
 
 <!doctype html>
-<html lang="en">
-  <head>
-    <Head
-      title={`${title} | ${SITE.TITLE}`}
-      description={description}
-      image={image}
-    />
-  </head>
+<html lang="en" class="dp-root bg-background text-foreground" data-theme="light" data-palette="cream-blue">
+  <Head>
+      <PageHead title={title} description={description} />
+  </Head>
   <body>
-    <div
-      class="box-border flex h-fit min-h-screen flex-col gap-y-6 bg-background font-sans antialiased dark:bg-background"
-    >
-      <Header />
-      <main class="flex-grow font-geist">
-        <slot />
-      </main>
-      <Footer />
+    <div class="dp-home" id="top">
+      <div class="dp-topblur" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="dp-sheet">
+        <SheetNav />
+        {
+          plain ? (
+            <main>
+              <slot />
+            </main>
+          ) : (
+            <main class="dp-page">
+              <div class="mx-auto flex grow flex-col gap-y-6">
+                <slot />
+              </div>
+            </main>
+          )
+        }
+      </div>
+      <SheetFooter />
     </div>
+    <Scribbles />
   </body>
 </html>

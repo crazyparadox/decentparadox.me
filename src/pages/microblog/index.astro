@@ -1,0 +1,40 @@
+---
+// Microblog: short notes as cards in a wrapping grid, newest first. Each card has a title, a
+// paragraph or two with any photos or video running to the card's edges, and how long ago it was
+// written (which is also its permalink).
+import PageHead from '@/components/PageHead.astro'
+import PageIntro from '@/components/sheet/PageIntro.astro'
+import Layout from '@/layouts/Layout.astro'
+import { ago, stamp } from '@/lib/ago'
+import { getCollection, render } from 'astro:content'
+
+const notes = (await getCollection('microblog'))
+  .filter((n) => !n.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+const rendered = await Promise.all(notes.map(async (note) => ({ note, Content: (await render(note)).Content })))
+---
+
+<Layout plain>
+  <PageHead slot="head" title="Microblog" description="Short notes, snippets and things in progress." />
+
+  <PageIntro label="microblog" count={notes.length}>
+    notes, snippets and things i'm in the <em data-scribble="underline">middle</em> of.
+    <img slot="art" class="dp-scene dp-scene--blend" src="/static/images/character/scene-microblog-blend.webp" alt="The mascot lying on a pile of instant photos and sticky notes, holding one up" />
+  </PageIntro>
+
+  <div class="mb-notes">
+    {
+      rendered.map(({ note, Content }) => (
+        <article class="mb-note">
+          <div class="mb-note__top">
+            <h2 class="mb-note__title"><a href={`/microblog/${note.id}`}>{note.data.title}</a></h2>
+            <div class="mb-note__body"><Content /></div>
+          </div>
+          <a class="dp-micro dp-micro--faint mb-note__time" href={`/microblog/${note.id}`}>
+            <time datetime={note.data.date.toISOString()} title={stamp(note.data.date)}>{ago(note.data.date)}</time>
+          </a>
+        </article>
+      ))
+    }
+  </div>
+</Layout>

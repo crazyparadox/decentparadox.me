@@ -2,18 +2,17 @@
 import MarqueeSection from '@/components/MarqueeSection.tsx'
 import { TextAnimate } from '@/components/ui/text-animate.tsx'
 import type { Children } from 'react'
+import WorkAt from '@/components/WorkAt'
 ---
 
 <main
-  class="flex min-h-[calc(100vh-96px)] flex-col items-center justify-between md:items-start py-4"
+  class="flex min-h-[calc(100vh-96px)] flex-col items-center justify-between py-4 md:items-start"
 >
   <div class="mt-8 w-full">
     <!-- <MarqueeSection /> -->
     <div
 class="
-  lg:size-full hidden md:block
-  opacity-45
-  transition-all duration-300
+  hidden opacity-45 transition-all duration-300 md:block
 "
 >
 <!-- Example: SVG, Image, or Animation -->
@@ -33,19 +32,26 @@ class="
 />
 </div>
 
-    <div class="flex h-auto w-full md:w-[85%] flex-col pt-12 z-10">
-      <h1 class="font-instrument font-normal leading-tight text-[56px] md:text-[72px] lg:text-[92px] xl:text-[128px] z-10 text-accent">Sasank Reddy</h1>
+    <div class="relative flex h-auto w-full md:w-[85%] flex-col pt-12 z-10">
+      <h1 class="w-fit font-instrument font-normal leading-tight text-[56px] md:text-[72px] lg:text-[92px] xl:text-[128px] z-10 text-accent">
+        Sasank Reddy
+      </h1>
+
       <div class="gap-6 sm:items-center space-y-6">
         <h2 class="font-sans font-normal leading-tight text-[14px] md:text-[18px] z-10 text-foreground/75">Developer ✦ Designer</h2>
         <div class="font-sans text-base font-normal max-w-[650px] leading-tight text-foreground z-10 space-y-2 flex gap-2 flex-col">
-          <TextAnimate
-            className="text-prose text-foreground/75"
-            animation="blurInUp"
-            by="word"
-            once
-            client:load
-            value={`A guy building tools and experiences at the cross-section of technology, lifestyle, and design.`}
-          />
+          <p class="text-prose text-foreground/75">
+            <TextAnimate
+              as="span"
+              className="inline"
+              animation="blurInUp"
+              by="word"
+              once
+              client:load
+              value={`A guy building tools and experiences at the cross-section of technology, lifestyle, and design.`}
+            />{' '}
+            <WorkAt client:load />
+          </p>
         </div>
       </div>
     </div>
@@ -56,21 +62,15 @@ class="
   <div class="relative w-full">
     <div class="flex items-start justify-between">
       <div class="flex flex-col gap-6">
-        <div
-          class="inline-flex w-fit items-center gap-1 rounded-sm bg-accent px-1.5 py-1.5"
-        >
-          <span class="font-supply text-xs font-normal text-background"
-            >Crafting ✦ Magic</span
-          >
+        <div class="inline-flex w-fit items-center gap-1 rounded-sm bg-accent px-1.5 py-1.5">
+          <span class="font-supply text-xs font-normal text-background">Crafting ✦ Magic</span>
         </div>
         <div class="max-w-[427px]">
           <p class="font-sans text-base font-normal leading-normal">
             <span class="text-foreground"
               >I enjoy working with computers, whether it's making websites, building simple apps, designing games, and experimenting with whatever I find interesting.</span
             >
-            <span class="text-foreground/75">
-              Also I Vibecode sometimes</span
-            >
+            <span class="text-foreground/75"> Also I Vibecode sometimes</span>
           </p>
         </div>
       </div>

@@ -1,0 +1,45 @@
+---
+// Dashed-capsule tag for the "Currently" column: where that data comes from.
+// Record spins slowly; dashes march. Drawn in currentColor.
+interface Props {
+  class?: string
+}
+const { class: className } = Astro.props
+---
+
+<div class:list={['lk-capsule text-foreground', className]} aria-hidden="true">
+  <svg class="lk-capsule-outline" preserveAspectRatio="none">
+    <rect x="1" y="1" width="100%" height="100%" rx="31" ry="31"></rect>
+  </svg>
+
+  <!-- record -->
+  <svg class="lk-record shrink-0" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+    <circle cx="12" cy="12" r="10.5"></circle>
+    <circle cx="12" cy="12" r="3.6"></circle>
+    <circle cx="12" cy="12" r="0.9" fill="currentColor" stroke="none"></circle>
+    <path d="M12 4.2a7.8 7.8 0 0 1 7.8 7.8" stroke-linecap="round"></path>
+  </svg>
+
+  <span class="lk-stack"><span>02</span><span>type</span><span>audio+film</span></span>
+
+  <span class="hidden items-center gap-3 xl:flex">
+    <span class="lk-roman">33&#8531;</span>
+    <!-- film frame -->
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+      <rect x="2.5" y="3" width="19" height="18" rx="2"></rect>
+      <path d="M7 3v18M17 3v18M2.5 8H7M2.5 12H7M2.5 16H7M17 8h4.5M17 12h4.5M17 16h4.5"></path>
+    </svg>
+  </span>
+
+  <span class="lk-stack ml-auto text-right">
+    <span>last.fm_scrobbles</span>
+    <span>letterboxd_diary</span>
+    <span>pulled_live</span>
+  </span>
+
+  <!-- play -->
+  <svg class="shrink-0" width="30" height="30" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="11.5" fill="currentColor"></circle>
+    <path d="M9.5 7.5v9l7.5-4.5Z" fill="var(--background)"></path>
+  </svg>
+</div>

@@ -1,0 +1,77 @@
+---
+// Pixel-resolve reveal for images marked data-reveal, like the one on zujistudio.com: the picture first
+// appears as a few large blocks, then the blocks halve until it is sharp. Each image waits until it
+// scrolls into view, and images that arrive together take turns instead of going off at once.
+// Without script, or with reduced motion, the images simply show.
+---
+
+<script>
+  const STEPS = [10, 18, 32, 56, 100, 180] // blocks across the picture at each step
+  const STEP_MS = 85
+  const GAP_MS = 220 // between one image starting and the next
+
+  let queue = Promise.resolve()
+
+  const resolveIn = (img: HTMLImageElement) =>
+    new Promise<void>((done) => {
+      const box = img.parentElement!
+      const canvas = document.createElement('canvas')
+      const w = (canvas.width = Math.max(1, Math.round(box.clientWidth)))
+      const h = (canvas.height = Math.max(1, Math.round(box.clientHeight)))
+      canvas.className = 'dp-reveal__canvas'
+      const ctx = canvas.getContext('2d')!
+      const small = document.createElement('canvas')
+      const sctx = small.getContext('2d')!
+      // match object-fit: cover from the top-left
+      const k = Math.max(w / img.naturalWidth, h / img.naturalHeight)
+      const sw = w / k, sh = h / k
+      const draw = (cols: number) => {
+        const rows = Math.max(1, Math.round((cols * h) / w))
+        small.width = cols
+        small.height = rows
+        sctx.imageSmoothingEnabled = true
+        sctx.drawImage(img, 0, 0, sw, sh, 0, 0, cols, rows)
+        ctx.imageSmoothingEnabled = false
+        ctx.clearRect(0, 0, w, h)
+        ctx.drawImage(small, 0, 0, cols, rows, 0, 0, w, h)
+      }
+      draw(STEPS[0])
+      box.append(canvas)
+      box.classList.add('is-revealing')
+      let i = 0
+      const tick = () => {
+        i++
+        if (i >= STEPS.length) {
+          box.classList.remove('is-waiting', 'is-revealing')
+          canvas.remove()
+          return
+        }
+        draw(STEPS[i])
+        setTimeout(tick, STEP_MS)
+      }
+      setTimeout(tick, STEP_MS)
+      setTimeout(done, GAP_MS)
+    })
+
+  const init = () => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return
+          io.unobserve(e.target)
+          const img = e.target as HTMLImageElement
+          const go = () => (queue = queue.then(() => resolveIn(img)))
+          if (img.complete && img.naturalWidth) go()
+          else img.addEventListener('load', go, { once: true })
+        })
+      },
+      { threshold: 0.25 },
+    )
+    document.querySelectorAll<HTMLImageElement>('img[data-reveal]').forEach((img) => {
+      img.parentElement?.classList.add('is-waiting')
+      io.observe(img)
+    })
+  }
+  document.addEventListener('astro:page-load', init)
+</script>

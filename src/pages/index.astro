@@ -1,44 +1,119 @@
 ---
-import About from '@/components/About.astro'
-import BlogCard from '@/components/BlogCard.astro'
-import Container from '@/components/Container.astro'
-import Hero from '@/components/Hero.astro'
-import Link from '@/components/Link.astro'
-import Projects from '@/components/Projects'
+// Home, drawn as sheet 01. Layout rules: design system → components/HomeSheet.
+// The previous home page is kept beside this file as _index.previous.astro.
+import PageHead from '@/components/PageHead.astro'
+import Doodle from '@/components/sheet/Doodle.astro'
+import Hello from '@/components/sheet/Hello.astro'
+import ProjectPlate from '@/components/sheet/ProjectPlate.astro'
+import Recently from '@/components/sheet/Recently.astro'
+import Tip from '@/components/sheet/Tip.astro'
 import { SITE } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import { getCollection } from 'astro:content'
-const blog = (await getCollection('blog'))
+
+const posts = (await getCollection('blog'))
   .filter((post) => !post.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, SITE.NUM_POSTS_ON_HOMEPAGE)
+
+const works = [
+  { name: 'neumann', mockup: 'neumann', alt: 'Neumann: the editor window in front of its documentation', line: 'code editor for agents _ desktop · web', status: 'live', tone: 'live', href: '/projects/neumann' },
+  { name: 'tethra', mockup: 'tethra', alt: 'Tethra: the chat window with a shared thread', line: 'chat for your own models _ desktop', status: 'beta', tone: 'beta', href: '/projects/tethra' },
+  { name: 'panopticon', mockup: 'panopticon', alt: 'Panopticon: three panels from its site', line: 'screen recorder with a memory _ macos', status: 'live', tone: 'live', href: '/projects/panopticon' },
+  { name: 'bi0s meetups', mockup: 'bi0s', alt: 'bi0s Meetups: the public site beside the organiser screens', line: 'monthly infosec meetups _ web', status: 'shipped', tone: 'done', href: '/projects/bi0smeetups' },
+  { name: 'cue', mockup: 'cue', alt: 'Cue: three iPhone screens', line: 'on-device assistant _ ios', status: 'in development', tone: 'wip', href: '/projects/cue' },
+] as const
+
+const pad = (n: number) => String(n).padStart(2, '0')
+const stamp = (d: Date) => `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())}`
 ---
 
-<Layout title="Home" description={SITE.DESCRIPTION}>
-  <Container class="flex flex-col gap-y-6">
-    <section>
-      <Hero />
-    </section>
-    <section>
-      <About />
-    </section>
-    <section>
-      <Projects client:load showDeco={true} />
-    </section>
-    <section class="flex flex-col gap-y-4 font-sans">
-      <div class="flex items-center justify-between font-geist opacity-75">
-        <h2 class="text-accent font-serif">(Latest posts)</h2>
-        <Link href="/blog" class="text-right text-accent font-serif"> (See all posts) </Link>
+<Layout plain>
+  <PageHead slot="head" />
+  {/* <StickerPile /> is parked until Sasank sends his own doodles to make stickers from */}
+
+  <header class="hero dp-grid">
+    <div class="hero__id">
+      {/* the mascot at work on the roof of the car, earphones in, stickers on the laptop; mirrored left to right */}
+      <img class="hero__car" src="/static/images/character/bat-car-hero.webp?v=5" alt="A cartoon bat in a hoodie and wired earphones sitting cross-legged on the roof of an old blue car, typing on a laptop covered in stickers" width="838" height="954" />
+      <h2 class="hero__hello"><Hello /></h2>
+      <p class="dp-body hero__role">
+        Design Engineer. I work at
+        <Tip id="flam" href="https://flamapp.ai" image="/static/images/tips/flam.jpg?v=2" alt="The mascot riding on the roof of a car made of streaks of red light">Flam</Tip>.
+      </p>
+    </div>
+    <h1 class="dp-statement hero__h">
+      i design and build software, mostly small tools i wanted to use <em data-scribble="circle">myself</em>.
+    </h1>
+  </header>
+
+  <section class="about">
+    <p class="dp-micro dp-eyebrow dp-eyebrow--doodle"><Doodle name="star" /><b>about</b></p>
+    <div class="dp-grid about__grid">
+      <div class="about__left">
+        <h2 class="dp-statement dp-statement--md">
+          ok, a bit about <em data-scribble="underline">me</em>.
+        </h2>
+        <Recently />
       </div>
-      <ul class="not-prose flex flex-col gap-y-4">
+      <div class="about__body">
+        <p class="dp-body">
+          grew up watching
+          <Tip id="rockets" image="/static/images/tips/rockets.jpg?v=2" alt="The mascot seen from behind, pointing up at a rocket climbing through a dark sky" note="born and brought up near sriharikota, a barrier island in india known for its space centre.">rockets</Tip>,
+          so ofc i got curious about engineering.
+        </p>
+        <p class="dp-body">
+          couldn't build rockets tho, so i started with computers. did cs + ai, and spent most weekends on
+          <Tip id="ctfs" image="/static/images/tips/ctfs.jpg?v=3" alt="The mascot hunched at a lab bench typing on a laptop, stressed and sweating, under a hand-drawn bi0s banner">ctfs</Tip>,
+          <Tip id="design" image="/static/images/tips/graphic-designing.jpg?v=2" alt="A cartoon still of one character swinging a wrench at another, captioned GRAFIX DESING">graphic designing</Tip>, or
+          <Tip id="sleeping" image="/static/images/tips/sleeping.jpg" alt="A video game character sprawled face up across a bed, fully dressed" note="me, most weekends.">sleeping</Tip>.
+        </p>
+        <p class="dp-body">
+          now i do the same thing but with a salary. rn i'm trying to decorate my
+          <Tip id="room" image="/static/images/tips/room.jpg?v=2" alt="The mascot seen from behind, standing in a bedroom and looking up at a wall covered in posters">room</Tip>
+          and break a
+          <Tip id="habit" image="/static/images/tips/bad-habit.jpg" alt="A man in a suit with his eyes shut, pinching the bridge of his nose" note="starting a new project before finishing one.">bad habit</Tip>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="works__head">
+    <p class="dp-micro dp-eyebrow dp-eyebrow--doodle"><Doodle name="star" /><b>select works</b><i>({pad(works.length)})</i></p>
+  </div>
+  <section class="works" aria-label="Select works">
+    {works.map((w, i) => <ProjectPlate fig={pad(i + 1)} {...w} />)}
+    {/* the sixth cell: where the rest of the work lives */}
+    <a class="dp-project works__more" href="https://github.com/crazyparadox" target="_blank" rel="noopener noreferrer">
+      <div class="dp-project__cover works__more-plate">
+        <span class="dp-statement dp-statement--md">the rest is on github</span>
+        <Doodle name="arrow-r" size={56} />
+      </div>
+      <div class="dp-project__info">
+        <h3 class="dp-title"><span class="dp-project__n">+</span>everything else</h3>
+        <div class="dp-project__meta"><p class="dp-micro dp-micro--faint">experiments, forks and half-finished things</p></div>
+      </div>
+    </a>
+  </section>
+
+  <section class="band">
+    <hr class="dp-rule" />
+    <div class="band__head">
+      <p class="dp-micro dp-eyebrow dp-eyebrow--doodle"><Doodle name="star" /><b>latest posts</b><i>({pad(posts.length)})</i></p>
+      <a class="dp-link" href="/blog">all posts <Doodle name="arrow-r" size={24} /></a>
+    </div>
+    <div class="dp-grid">
+      <div class="posts">
         {
-          blog.map((post) => (
-            <li>
-              <BlogCard entry={post} />
-            </li>
+          posts.map((post, i) => (
+            <a class="dp-post" href={`/${post.collection}/${post.id}`}>
+              <span class="dp-post__n">{pad(i + 1)}</span>
+              <h3 class="dp-post__title">{post.data.title}</h3>
+              <span class="dp-micro dp-micro--faint">{stamp(post.data.date)}</span>
+            </a>
           ))
         }
-      </ul>
-    </section>
-  </Container>
+      </div>
+    </div>
+  </section>
 </Layout>

@@ -1,0 +1,79 @@
+---
+// The sticker pile: seven stickers you can pick up and stick anywhere on the page.
+// Positions are kept in localStorage. A sticker with an href opens it on a click without a drag.
+import Sticker from './Sticker.astro'
+import { STICKERS, type StickerName } from './stickers'
+const order: StickerName[] = ['ctf', 'record', 'manga', 'giveortake', 'film', 'vibecoded', 'hotchocolate']
+const tilt = [-9, 6, -4, 8, -7, 5, -10]
+const drop = [14, -10, 18, -16, 10, -6, 16]
+---
+
+<div class="dp-stickers" data-stickers>
+  {
+    order.map((name, i) => (
+      <button
+        type="button"
+        class="dp-sticker"
+        data-sticker={name}
+        data-href={STICKERS[name].href}
+        style={`--i:${i}; --tilt:${tilt[i]}deg; --drop:${drop[i]}px`}
+        aria-label={`${STICKERS[name].label} sticker. Drag to move it${STICKERS[name].href ? ', click to open the project' : ''}.`}
+      >
+        <span class="dp-sticker__label">{STICKERS[name].label}</span>
+        <Sticker name={name} />
+      </button>
+    ))
+  }
+</div>
+
+<script>
+  const KEY = 'dp-stickers-v2'
+  const init = () => {
+    const pile = document.querySelector<HTMLElement>('[data-stickers]')
+    if (!pile) return
+    let saved: Record<string, { x: number; y: number }> = {}
+    try { saved = JSON.parse(localStorage.getItem(KEY) || '{}') } catch {}
+    let top = 10
+
+    pile.querySelectorAll<HTMLElement>('.dp-sticker').forEach((el) => {
+      const name = el.dataset.sticker!
+      const place = (x: number, y: number) => {
+        el.style.left = `${x * pile.offsetWidth}px`
+        el.style.top = `${y}px`
+      }
+      if (saved[name]) place(saved[name].x, saved[name].y)
+
+      let sx = 0, sy = 0, ox = 0, oy = 0, held = false, dragged = false
+      el.addEventListener('pointerdown', (e) => {
+        held = true; dragged = false
+        sx = e.clientX; sy = e.clientY; ox = el.offsetLeft; oy = el.offsetTop
+        el.setPointerCapture(e.pointerId)
+        el.style.zIndex = `${++top}`
+        el.classList.add('is-held')
+      })
+      el.addEventListener('pointermove', (e) => {
+        if (!held) return
+        const dx = e.clientX - sx, dy = e.clientY - sy
+        if (!dragged && Math.hypot(dx, dy) < 5) return
+        dragged = true
+        el.style.left = `${ox + dx}px`
+        el.style.top = `${oy + dy}px`
+      })
+      const letGo = () => {
+        if (!held) return
+        held = false
+        el.classList.remove('is-held')
+        if (!dragged) return
+        saved[name] = { x: el.offsetLeft / pile.offsetWidth, y: el.offsetTop }
+        try { localStorage.setItem(KEY, JSON.stringify(saved)) } catch {}
+      }
+      el.addEventListener('pointerup', letGo)
+      el.addEventListener('pointercancel', letGo)
+      el.addEventListener('click', (e) => {
+        if (dragged) { e.preventDefault(); return }
+        if (el.dataset.href) window.location.href = el.dataset.href
+      })
+    })
+  }
+  document.addEventListener('astro:page-load', init)
+</script>

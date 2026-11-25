@@ -1,0 +1,20 @@
+---
+// A word with a note. Hover, focus or tap the word and a narrow light card opens above it, holding a
+// picture, a line of text, or both. The card is deliberately narrow and tall.
+interface Props {
+  id: string // unique on the page; ties the word to its note for screen readers
+  image?: string
+  alt?: string
+  note?: string
+  href?: string // when set, the word is also a link
+}
+const { id, image, alt = '', note, href } = Astro.props
+---
+
+{
+  href ? (
+    <span class="dp-tip"><a class="dp-tip__word" href={href} target="_blank" rel="noopener noreferrer" aria-describedby={`tip-${id}`}><slot /></a><span class="dp-tip__note" id={`tip-${id}`} role="tooltip">{image && <img src={image} alt={alt} loading="lazy" decoding="async" />}{note && <span class="dp-tip__text">{note}</span>}</span></span>
+  ) : (
+    <span class="dp-tip" tabindex="0" aria-describedby={`tip-${id}`}><span class="dp-tip__word"><slot /></span><span class="dp-tip__note" id={`tip-${id}`} role="tooltip">{image && <img src={image} alt={alt} loading="lazy" decoding="async" />}{note && <span class="dp-tip__text">{note}</span>}</span></span>
+  )
+}

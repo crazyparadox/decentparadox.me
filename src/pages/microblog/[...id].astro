@@ -1,0 +1,33 @@
+---
+// One note on its own page.
+import PageHead from '@/components/PageHead.astro'
+import Doodle from '@/components/sheet/Doodle.astro'
+import Layout from '@/layouts/Layout.astro'
+import { ago, stamp } from '@/lib/ago'
+import { getCollection, render } from 'astro:content'
+
+export async function getStaticPaths() {
+  const notes = (await getCollection('microblog')).filter((n) => !n.data.draft)
+  return notes.map((note) => ({ params: { id: note.id }, props: { note } }))
+}
+
+const { note } = Astro.props
+const { Content } = await render(note)
+---
+
+<Layout plain>
+  <PageHead slot="head" title={note.data.title} description={`A note from ${stamp(note.data.date)}.`} />
+
+  <article class="mb-single">
+    <a class="dp-link mb-single__back" href="/microblog"><Doodle name="arrow-r" size={24} flip /> all notes</a>
+    <div class="mb-note">
+      <div class="mb-note__top">
+        <h1 class="mb-note__title">{note.data.title}</h1>
+        <div class="mb-note__body"><Content /></div>
+      </div>
+      <p class="dp-micro dp-micro--faint mb-note__time">
+        <time datetime={note.data.date.toISOString()}>{stamp(note.data.date)}</time> _ {ago(note.data.date)}
+      </p>
+    </div>
+  </article>
+</Layout>

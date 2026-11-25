@@ -1,11 +1,7 @@
 ---
 export const prerender = false
-import Breadcrumbs from '@/components/Breadcrumbs.astro'
-import Container from '@/components/Container.astro'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import PageIntro from '@/components/sheet/PageIntro.astro'
+import { stamp } from '@/lib/ago'
 import Layout from '@/layouts/ServerPageLayout.astro'
 import { neon } from '@neondatabase/serverless'
 import { SITE } from '@/consts'
@@ -48,91 +44,59 @@ const result =
 
 ---
 
-<Layout title="Guestbook" description={SITE.DESCRIPTION}>
-  <Container>
-    <Breadcrumbs items={[{ label: 'Guestbook', icon: 'lucide:signature' }]} />
+<Layout title="Guestbook" description={SITE.DESCRIPTION} plain>
+  <PageIntro label="guestbook" count={result?.length}>
+    say something. it stays <em data-scribble="underline">here</em>.
+  </PageIntro>
 
-    <div class="w-full pt-4 font-sans md:min-w-[36rem]">
-      <h1 class="mb-4 font-serifItalic text-3xl text-accent">Guestbook</h1>
-      <Card className="mb-8 border">
-        <CardContent className="p-2">
-          <form
-            id="guestbookForm"
-            method="post"
-            enctype="application/x-www-form-urlencoded"
-            class="card mb-4 grid w-full items-start gap-1 p-3"
-          >
-            <Input
-              id="name"
-              placeholder="Name"
-              type="text"
-              name="name"
-              required
-            />
-            <Input
-              id="link"
-              placeholder="Link to web/social media presence"
-              type="url"
-              name="link"
-            />
-            <Textarea
-              placeholder="Message"
-              className=" min-h-[120px]"
-              name="message"
-            />
+  <div class="dp-grid gb">
+    <div class="gb__side">
+    <img class="dp-scene gb__art" src="/static/images/character/scene-guestbook-cut.webp" alt="The mascot sitting on an open guestbook, signing it with a fountain pen as tall as he is" width="851" height="730" />
+    <form id="guestbookForm" class="gb__form" method="post" enctype="application/x-www-form-urlencoded">
+      <label class="dp-field">
+        <span class="dp-micro">name</span>
+        <input id="name" name="name" type="text" required maxlength="64" autocomplete="name" />
+      </label>
+      <label class="dp-field">
+        <span class="dp-micro">link <i>optional</i></span>
+        <input id="link" name="link" type="url" maxlength="128" placeholder="https://" />
+      </label>
+      <label class="dp-field">
+        <span class="dp-micro">message</span>
+        <textarea name="message" rows="4" maxlength="320"></textarea>
+      </label>
+      <label class="dp-check">
+        <input type="checkbox" id="formAnonymous" name="anonymous" />
+        <span class="dp-micro">sign as anonymous</span>
+      </label>
+      <button class="dp-btn dp-btn--ink" id="submitButton" type="submit">sign the guestbook</button>
+    </form>
+    </div>
 
-            <div class="flex items-center gap-2">
-              <input
-                class="mt-0.5"
-                type="checkbox"
-                id="formAnonymous"
-                name="anonymous"
-              />
-              <label for="formAnonymous">Submit anonymously?</label>
-            </div>
-            <Button
-              className="mt-3 w-full justify-self-center bg-accent text-background hover:text-foreground py-1 rounded-md"
-              id="submitButton"
-              type="submit"
-              value="Submit"
-            >Submit</Button>
-          </form>
-        </CardContent>
-      </Card>
-      <ul class="grid gap-1">
-        {
-          result?.map((e) => (
-            <li class="card grid items-center gap-y-1 border border-b-0 border-l-0 border-r-0 border-t-2 py-4">
-              {e.socialLink ? (
-                <a
-                  class="row-start-1"
-                  rel="ugc"
-                  href={e.socialLink}
-                  target="_blank"
-                >
-                  <h2 class="text-h4 text-accent font-serif">
-                    {e.isAnonymous ? 'Anonymous' : e.name}
-                  </h2>
+    <ul class="gb__list">
+      {
+        result?.map((e) => (
+          <li class="gb__entry">
+            <div class="gb__who">
+              {e.socialLink && !e.isAnonymous ? (
+                <a rel="ugc" href={e.socialLink} target="_blank">
+                  <h2>{e.name}</h2>
                 </a>
               ) : (
-                <h2 class="text-h4 row-start-1">
-                  {e.isAnonymous ? 'Anonymous' : e.name}
-                </h2>
+                <h2>{e.isAnonymous ? 'anonymous' : e.name}</h2>
               )}
-              <span class="row-start-1 justify-self-end text-neutral-500 dark:text-neutral-400">
-                {Intl.DateTimeFormat(undefined).format(e.createdAt)}
-              </span>
-              {e.message && <p set:html={e.message} />}
-            </li>
-          ))
-        }
-      </ul>
-    </div>
+              <span class="dp-micro dp-micro--faint">{stamp(new Date(Number(e.createdAt)))}</span>
+            </div>
+            {e.message && <p class="dp-body" set:html={e.message} />}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
     <script is:inline>
       const submitButton = document.querySelector('#submitButton')
       document.forms[0].addEventListener('submit', () => {
         submitButton.disabled = true
       })
     </script>
-  </Container>
 </Layout>

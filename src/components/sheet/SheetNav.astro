@@ -1,0 +1,21 @@
+---
+// The site nav on the 12-column grid, sticky under a progressive blur along the top edge.
+import Mark from '@/components/sheet/Mark.astro'
+import { NAV_LINKS, SITE } from '@/consts'
+
+const here = Astro.url.pathname.replace(/\/$/, '') || '/'
+const current = (href: string) => here === href || here.startsWith(href + '/')
+---
+
+<nav class="dp-nav" aria-label="Main">
+  <a class="dp-nav__brand" href="/">
+    <Mark size={22} />
+    <span>decentparadox<sup>®</sup></span>
+  </a>
+  <div class="dp-nav__links">
+    {NAV_LINKS.map((l) => <a class="dp-nav__link" href={l.href} aria-current={current(l.href) ? 'page' : undefined}>{l.label}</a>)}
+  </div>
+  <div class="dp-nav__end">
+    <a class="dp-nav__link" href={`mailto:${SITE.EMAIL}`}>contact</a>
+  </div>
+</nav>

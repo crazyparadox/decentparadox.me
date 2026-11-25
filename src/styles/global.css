@@ -145,35 +145,36 @@
 }
 
 :root {
-  --background: oklch(96.86% 0.0131 82.4);
-  --foreground: oklch(24.71% 0.0024 247.92);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(54.67% 0.2475 275.21);
-  --accent-foreground: oklch(96.86% 0.0131 82.4);
+  /* paper theme: same values as the sheet tokens in sheet.css */
+  --background: #f8f4ec;
+  --foreground: #1a1818;
+  --primary: #1a1818;
+  --primary-foreground: #f8f4ec;
+  --secondary: #ece7dc;
+  --secondary-foreground: #1a1818;
+  --muted: #ece7dc;
+  --muted-foreground: #55504b;
+  --accent: #b93317;
+  --accent-foreground: #f8f4ec;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: #dad4c8;
+  --ring: #857e76;
 }
 
 [data-theme='dark'] {
-  --background: oklch(24.71% 0.0024 247.92);
-  --foreground: oklch(96.86% 0.0131 82.4);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(73.85% 0.0976 284.42);
-  --accent-foreground: oklch(24.71% 0.0024 247.92);
+  --background: #1a1818;
+  --foreground: #ece7df;
+  --primary: #ece7df;
+  --primary-foreground: #1a1818;
+  --secondary: #221f1f;
+  --secondary-foreground: #ece7df;
+  --muted: #221f1f;
+  --muted-foreground: #a69f98;
+  --accent: #ff6f52;
+  --accent-foreground: #1a1818;
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --ring: oklch(0.556 0 0);
+  --border: #353030;
+  --ring: #7a7370;
 }
 
 @layer base {
@@ -183,4 +184,241 @@
   ::file-selector-button {
     @apply border-border outline-ring/50 tracking-tight;
   }
+
+  ::selection {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+  }
+}
+
+/* ------------------------------------------------------------------
+   micrographics — technical-drawing annotation language
+   (callouts, balloons, dimension ticks, sheet zones, title block)
+   ------------------------------------------------------------------ */
+@layer components {
+  .micro {
+    font-family: var(--font-supply);
+    font-size: 10px;
+    line-height: 1.4;
+    letter-spacing: 0.08em;
+    text-transform: lowercase;
+    color: color-mix(in oklch, var(--foreground) 55%, transparent);
+  }
+
+
+}
+
+/* drawing sheet (footer) */
+@layer components {
+  .drw-zone {
+    display: grid;
+    place-items: center;
+    font-family: var(--font-supply);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: color-mix(in oklch, var(--accent-foreground) 55%, transparent);
+  }
+  .drw-tick {
+    position: absolute;
+    background: color-mix(in oklch, var(--accent-foreground) 60%, transparent);
+  }
+  .drw-titleblock {
+    font-family: var(--font-supply);
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+    border-top: 1px solid color-mix(in oklch, var(--accent-foreground) 50%, transparent);
+  }
+  .drw-titleblock > div {
+    padding: 0.5rem 0.75rem 0.6rem;
+    border-right: 1px solid color-mix(in oklch, var(--accent-foreground) 30%, transparent);
+    border-bottom: 1px solid color-mix(in oklch, var(--accent-foreground) 30%, transparent);
+  }
+  .drw-titleblock > div:nth-last-child(-n + 3) { border-bottom: 0; }
+  .drw-field {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-size: 8px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: color-mix(in oklch, var(--accent-foreground) 55%, transparent);
+  }
+  /* centerlines: long–short dash, extending past the part */
+  .drw-centerline-h,
+  .drw-centerline-v {
+    position: absolute;
+    pointer-events: none;
+    color: color-mix(in oklch, var(--foreground) 30%, transparent);
+  }
+  .drw-centerline-h {
+    left: -12%;
+    right: -12%;
+    top: 50%;
+    height: 1px;
+    background: repeating-linear-gradient(90deg, currentColor 0 14px, transparent 14px 18px, currentColor 18px 20px, transparent 20px 24px);
+  }
+  .drw-centerline-v {
+    top: -12%;
+    bottom: -12%;
+    left: 50%;
+    width: 1px;
+    background: repeating-linear-gradient(180deg, currentColor 0 14px, transparent 14px 18px, currentColor 18px 20px, transparent 20px 24px);
+  }
+}
+
+/* ------------------------------------------------------------------
+   sheet lockups (footer) — high-fidelity marks on the accent sheet
+   ------------------------------------------------------------------ */
+@layer components {
+  .lk-sheet { color: var(--accent-foreground); }
+  .lk-block { display: flex; flex-direction: column; container-type: inline-size; }
+
+  .lk-wordmark {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: min(14.2cqw, 64px);
+    line-height: 0.9;
+    letter-spacing: -0.055em;
+    white-space: nowrap;
+  }
+  .lk-wordmark sup { font-size: 0.32em; font-weight: 600; letter-spacing: 0; top: -1.3em; margin-left: 0.12em; }
+
+  .lk-serial {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    font-family: var(--font-sans);
+    font-size: 15px;
+  }
+  .lk-serial b { font-weight: 700; }
+  .lk-serial span { font-family: var(--font-supply); font-weight: 200; letter-spacing: 0.18em; }
+
+  .lk-strike {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+    white-space: nowrap;
+  }
+  .lk-pill {
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    padding: 0 12px;
+    border: 1.5px solid currentColor;
+    border-radius: 9999px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .lk-title {
+    font-family: var(--font-supply);
+    font-size: 17px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+  .lk-sub {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.25;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+  }
+  .lk-prompt {
+    font-family: var(--font-supply);
+    font-size: 12px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .lk-caret {
+    display: inline-block;
+    width: 0.55em;
+    height: 1em;
+    margin-left: 0.15em;
+    vertical-align: -0.15em;
+    background: currentColor;
+  }
+  .lk-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-supply);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .lk-frame { min-height: 64px; }
+  .lk-corner { position: absolute; width: 16px; height: 14px; border-color: currentColor; }
+  .lk-inc {
+    font-family: var(--font-sans);
+    font-size: 22px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+
+}
+
+/* --- motion (only once revealed) --- */
+.lk-sheet .lk-tick,
+.lk-sheet .lk-barcode rect { transform-box: fill-box; }
+.lk-sheet.is-in .lk-tick {
+  transform-origin: top;
+  animation: lk-grow 520ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: var(--d);
+}
+.lk-sheet.is-in .lk-barcode rect {
+  transform-origin: bottom;
+  animation: lk-grow 460ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: var(--d);
+}
+.lk-caret { animation: lk-caret 1.05s steps(1) infinite; }
+
+@keyframes lk-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes lk-caret { 50% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .lk-sheet *, .lk-caret { animation: none !important; }
+}
+
+/* dashed capsule tag (Currently column) */
+@layer components {
+  .lk-capsule {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    min-height: 62px;
+    padding: 10px 20px;
+  }
+  .lk-capsule-outline {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+  .lk-capsule-outline rect {
+    width: calc(100% - 2px);
+    height: calc(100% - 2px);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-dasharray: 9 7;
+  }
+  .lk-roman { font-family: var(--font-instrument); font-size: 28px; line-height: 1; letter-spacing: -0.02em; }
+}
+.lk-capsule-outline rect { animation: lk-march 2.4s linear infinite; }
+.lk-record { animation: lk-spin 6s linear infinite; }
+@keyframes lk-march { to { stroke-dashoffset: -32; } }
+@keyframes lk-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .lk-capsule-outline rect, .lk-record { animation: none; }
 }

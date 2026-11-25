@@ -1,0 +1,20 @@
+---
+// One sticker, drawn. `size` is its width in px.
+import { STICKERS, type StickerName } from './stickers'
+interface Props {
+  name: StickerName
+  size?: number
+  class?: string
+}
+const { name, size = 120, class: className } = Astro.props
+const s = STICKERS[name]
+---
+
+<svg class:list={['dp-sticker__art', className]} width={size} height={size} viewBox="-8 -8 136 136" aria-hidden="true">
+  <g fill={s.outline} stroke={s.outline} stroke-width="14" stroke-linejoin="round" stroke-linecap="round">
+    {s.under && <Fragment set:html={s.under} />}
+    <Fragment set:html={s.silhouette} />
+  </g>
+  <g fill={s.fill} set:html={s.silhouette} />
+  <Fragment set:html={s.detail} />
+</svg>

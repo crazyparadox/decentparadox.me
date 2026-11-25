@@ -1,11 +1,16 @@
 ---
+// The one page layout: the sheet nav, the page, the shared foot. Every page uses it.
+// `plain` hands the page the full sheet with no wrapper (the home page lays itself out on the grid);
+// without it the content sits in a padded column, as the older pages expect.
 import '@/styles/global.css'
 import '@/styles/typography.css'
+import '@/styles/sheet.css'
 
-import Footer from '@/components/Footer.astro'
 import Head from '@/components/Head.astro'
-import Header from '@/components/Header.astro'
-import { SITE } from '@/consts'
+import Reveal from '@/components/sheet/Reveal.astro'
+import Scribbles from '@/components/sheet/Scribbles.astro'
+import SheetFooter from '@/components/sheet/SheetFooter.astro'
+import SheetNav from '@/components/sheet/SheetNav.astro'
 import { cn } from '@/lib/utils'
 
 interface Props {
@@ -13,28 +18,42 @@ interface Props {
   title?: string
   description?: string
   image?: string
+  plain?: boolean
 }
 
-const { class: className, title, description, image} = Astro.props
-
+const { class: className, plain = false } = Astro.props
 ---
 
 <!doctype html>
-<html class="bg-background text-foreground">
+<html lang="en" class="dp-root bg-background text-foreground" data-theme="light" data-palette="cream-blue">
   <Head>
     <slot name="head" />
   </Head>
   <body>
-    <div class="box-border flex min-h-screen flex-col bg-background font-sans antialiased dark:bg-background">
-      <Header />
-      <slot name="subposts-navigation" />
-      <slot name="table-of-contents" />
-      <main class="grow">
-        <div class={cn('mx-auto flex grow flex-col gap-y-6 px-8', className)}>
-          <slot />
-        </div>
-      </main>
-      <Footer />
+    <div class="dp-home" id="top">
+      {/* progressive blur along the top edge: sharp at its lower edge, strongest at the very top */}
+      <div class="dp-topblur" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="dp-sheet">
+        <SheetNav />
+        <slot name="subposts-navigation" />
+        <slot name="table-of-contents" />
+        {
+          plain ? (
+            <main class={className}>
+              <slot />
+            </main>
+          ) : (
+            <main class="dp-page">
+              <div class={cn('mx-auto flex grow flex-col gap-y-6', className)}>
+                <slot />
+              </div>
+            </main>
+          )
+        }
+      </div>
+      <SheetFooter />
     </div>
+    <Scribbles />
+    <Reveal />
   </body>
 </html>

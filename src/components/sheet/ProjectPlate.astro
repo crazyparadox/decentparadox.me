@@ -1,0 +1,36 @@
+---
+// Project card: a mockup image (built by scripts/mockups.py) that resolves in from large pixels,
+// then number + serif title and one mono line with status.
+interface Props {
+  fig: string
+  name: string
+  line: string
+  status: string
+  tone: 'live' | 'beta' | 'wip' | 'done'
+  href: string
+  mockup: string // file name under /static/images/mockups, without extension
+  alt: string
+}
+const { fig, name, line, status, tone, href, mockup, alt } = Astro.props
+
+// The mockups are rebuilt in place under the same file name, so stamp the URL with the file's
+// modified time; otherwise a browser keeps showing the copy it cached before the rebuild.
+import { statSync } from 'node:fs'
+let stamp = ''
+try {
+  stamp = `?v=${Math.round(statSync(`public/static/images/mockups/${mockup}.jpg`).mtimeMs / 1000).toString(36)}`
+} catch {}
+---
+
+<a class="dp-project" href={href}>
+  <div class="dp-project__cover dp-thumb">
+    <img src={`/static/images/mockups/${mockup}.jpg${stamp}`} alt={alt} width="1600" height="1000" loading="lazy" decoding="async" data-reveal />
+  </div>
+  <div class="dp-project__info">
+    <h3 class="dp-title"><span class="dp-project__n">{fig}</span>{name}</h3>
+    <div class="dp-project__meta">
+      <p class="dp-micro dp-micro--faint">{line}</p>
+      <span class:list={['dp-micro dp-status', `dp-status--${tone}`]}>{status}</span>
+    </div>
+  </div>
+</a>
